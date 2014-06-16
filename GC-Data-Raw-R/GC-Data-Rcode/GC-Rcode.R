@@ -89,7 +89,7 @@ vialDF$CH4c <- CH4c
 
 
 ########################################################################
-# STANDARDS CURVE AND PPM CORRECTION
+# STANDARDS CURVEs AND PPM CORRECTION
 
 # ppm values in the standards
 ppmNstds <- c(0.301,1.57,3) # Mix1, Mix2, 3N2O
@@ -108,84 +108,148 @@ stdtabCO2
 stdtabCO2[2,1:2]<-0
 
 
-
-
 # build standards curves
 
-# this matches with the excel doc (since the ambient values are slightly off - see above for note about why temp correction isn't incorporated)
-x<-c(61.487075,0,259.881775)
-lm(stdtabCO2$ppm ~ x)
-# using standards that got the tmp correction when correcting for ambients
-lm(stdtabCO2$ppm ~ stdtabCO2$CO2c)
+# note that these are a bit off from the excel doc, because I'm here using standards that got the tmp correction when correcting for ambients
+# from here, set new vectors that match the excel so you can continue to compare (delete this part later)
 
-# correlation coefficient
-corcoeff <- cor(x, stdtabCO2$ppm)
-# using standards that got the tmp correction when correcting for ambients
-cor(stdtabCO2$CO2c, stdtabCO2$ppm, method = "pearson")
-cor(stdtabCO2$CO2c, stdtabCO2$ppm)
-# square of that is the pearson's R^2
+stdtabN2O$N2Oc <- c(15.2058625, 84.7365125, 140.5202125) # TMP!!!!
+stdtabCO2$CO2c <- c(61.487075, 0, 259.881775) # TMP!!!!
+
+# high level N2O calibration
+lmN2Ohigh <- lm(stdtabN2O$ppm ~ stdtabN2O$N2Oc)
+lmN2Ohigh_intercept <- coef(summary(lmN2Ohigh))["(Intercept)","Estimate"]
+lmN2Ohigh_slope <- coef(summary(lmN2Ohigh))["stdtabN2O$N2Oc","Estimate"]
+# square of correlation is pearson's R^2
 # http://en.wikipedia.org/wiki/Coefficient_of_determination
-pearsonsR2 <- corcoeff^2
+lmN2Ohigh_cor <- cor(stdtabN2O$N2Oc, stdtabN2O$ppm)
+lmN2Ohigh_pearsonsR2 <- lmN2Ohigh_cor^2
+
+# low level N2O calibration
+lmN2Olow <- lm(stdtabN2O$ppm[1:2] ~ stdtabN2O$N2Oc[1:2])
+lmN2Olow_intercept <- coef(summary(lmN2Olow))["(Intercept)","Estimate"]
+lmN2Olow_slope <- coef(summary(lmN2Olow))["stdtabN2O$N2Oc[1:2]","Estimate"]
+# square of correlation is pearson's R^2
+# http://en.wikipedia.org/wiki/Coefficient_of_determination
+lmN2Olow_cor <- cor(stdtabN2O$N2Oc[1:2], stdtabN2O$ppm[1:2])
+lmN2Olow_pearsonsR2 <- lmN2Olow_cor^2
+
+# high level CO2 calibration
+lmCO2high <- lm(stdtabCO2$ppm ~ stdtabCO2$CO2c)
+lmCO2high_intercept <- coef(summary(lmCO2high))["(Intercept)","Estimate"]
+lmCO2high_slope <- coef(summary(lmCO2high))["stdtabCO2$CO2c","Estimate"]
+# square of correlation is pearson's R^2
+# http://en.wikipedia.org/wiki/Coefficient_of_determination
+lmCO2high_cor <- cor(stdtabCO2$CO2c, stdtabCO2$ppm)
+lmCO2high_pearsonsR2 <- lmCO2high_cor^2
+
+# low level CO2 calibration
+lmCO2low <- lm(stdtabCO2$ppm[1:2] ~ stdtabCO2$CO2c[1:2])
+lmCO2low_intercept <- coef(summary(lmCO2low))["(Intercept)","Estimate"]
+lmCO2low_slope <- coef(summary(lmCO2low))["stdtabCO2$CO2c[1:2]","Estimate"]
+# square of correlation is pearson's R^2
+# http://en.wikipedia.org/wiki/Coefficient_of_determination
+lmCO2low_cor <- cor(stdtabCO2$CO2c[1:2], stdtabCO2$ppm[1:2])
+lmCO2low_pearsonsR2 <- lmCO2low_cor^2
 
 
 
+# get ppm correction columns, save to dataframe
 
+# ifelse test (use high or low standards curve?)
+N2Oppm <- ifelse(N2Oc>stdtabN2O$N2Oc[2], N2Oc*lmN2Ohigh_slope+lmN2Ohigh_intercept, N2Oc*lmN2Olow_slope+lmN2Olow_intercept)
+CO2ppm <- ifelse(CO2c>stdtabCO2$CO2c[1], CO2c*lmCO2high_slope+lmCO2high_intercept, CO2c*lmCO2low_slope+lmCO2low_intercept)
 
-# N2O stds regression
-
+vialDF$N2Oppm <- N2Oppm
+vialDF$CO2ppm <- CO2ppm
+# vialDF$CH4c <- CH4c # don't forget to do CH4 here once you have the standards info
 
 
 
 
 ###### Q: how come we don't use 10N2O in the standards curves?
 ###### Q: what are the CH4 values for Mix1 and Mix2 (and the other standards, if applicable)?
+###### Q: don't forget to do the ppm and ng/cm3 corrections for methane (currently there are placeholders)
 
 
 
 
+########################################################################
+# CONVERT TO MASS PER VOLUUME FROM PPM
+
+# tmp-volume-land use dataframe
+ngN_cm3_correction <- c(341.2262)
+ngC_cm3_correction <- c(0.1462398)
+
+LU <- c("F","M","S")
+degC <- c(20,20,20)
+voltmpcorrN2O <- ngN_cm3_correction/(degC+273.15)
+voltmpcorrCO2 <- ngC_cm3_correction/(degC+273.15)
+
+voltmptab = data.frame(LU,degC,voltmpcorrN2O,voltmpcorrCO2)
+
+# solve for ngN_cm3 and ngC_cm3 and save to df
+ngN_cm3_N2O <- N2Oppm*voltmptab[1,3]
+##### here is where I should have screened for land use - instead, I just used the 20 degC option for all land uses.
+ngC_cm3_CO2 <- CO2ppm*voltmptab[1,4]
+vialDF$ngN_cm3_N2O <- ngN_cm3_N2O
+vialDF$ngC_cm3_CO2 <- ngC_cm3_CO2
+
+
+###### Q: adjust tmp by land use (see line 191)
+###### Q: don't forget to go back and do CH4 for this step as well
 
 
 
 
-
-
-
-
-## solve for ppm corrected
-## solve for ambient-corrected
-## solve for ngN_cm3 and ngC_cm3
-
-
-
-
-
-
-
-
-
-
-
-
-# build standards curve - N2O
-# get the 3 N2O ppm values and peak area values
-
-# build standards curve - CO2
-
-# build standards curve - CH4
-
-
-
-
+########################################################################
+# SUMMARY REPORT RE: THINGS TO WATCH
 
 # check on time 0 values inside chambers
 
 
 
-# issue report: is anything wrong?  and summary for ambient vials
+
+
+# summary for ambient vials
 
 
 
 
+
+# print warnings
+
+
+
+
+
+########################################################################
+# SAVE THINGS
+
+# put GC run info into data frame
+vialDF$GCrun <- runsheet$GCRun
+# vialDF <- subset(vialDF, select = -c(GCdate) ) # needed this because I changed my mind about my labels
+
+# save vialDF
+write.csv(vialDF, file="~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rcode/PRACTICE/vialDF.csv", row.names=FALSE)
+
+###### Q: how to best loop this so the correct run sheet gets brought in and the vialDF gets saved correctly?  think of a good data storage option for this
+###### Q: save these files individually but also build one huge vialDF that combines every run?  i could do that in a separete R script, too...
+
+# save(list=paste("data", i, sep=""), file=paste("data", i, ".Rdata", sep="")) 
+# solution suggested at http://r.789695.n4.nabble.com/assigning-and-saving-datasets-in-a-loop-with-names-changing-with-quot-i-quot-td843350.html
+# or 
+# for (i in 1:12){ 
+# data <- my.fun(my.list[i]))   
+# save(data,file = paste("data",i,".RData", sep="")) } 
+
+
+
+
+########################################################################
+# POSSIBLE TO DO
+
+##### what about low or no pressure vials? remove these data points.  or do so when scrubbing for low R2 values on flux calcs
 
 
 
