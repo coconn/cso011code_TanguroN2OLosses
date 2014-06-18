@@ -4,6 +4,19 @@
 
 
 ########################################################################
+# SET UP INFO FOR THIS GC RUN
+
+locationrunsheet # where is the runsheet info csv
+locationdetectors # where are the ecd, fid and tcd files
+
+filesavename # how to save vialDF csv (give it a number and a name, like vialDF_1_201403boxU or something like that)
+
+# line 129-130 need to go
+
+#file = paste("data",i,".RData", sep="")
+
+
+########################################################################
 # BRING IN DATA, MAKE DATAFRAME
 
 ## pick a particular GC run
@@ -182,7 +195,7 @@ ngN_cm3_correction <- c(341.2262)
 ngC_cm3_correction <- c(0.1462398)
 
 LU <- c("F","M","S")
-degC <- c(20,20,20)
+degC <- c(25,25,25)
 voltmpcorrN2O <- ngN_cm3_correction/(degC+273.15)
 voltmpcorrCO2 <- ngC_cm3_correction/(degC+273.15)
 
@@ -205,20 +218,72 @@ vialDF$ngC_cm3_CO2 <- ngC_cm3_CO2
 ########################################################################
 # SUMMARY REPORT RE: THINGS TO WATCH
 
-# check on time 0 values inside chambers
-
-
-
-
-
 # summary for ambient vials
 
+ambNinfo <- ambientsN[1:4,1]
+ambNinfo[5] <- ambientsNmean
+ambNinfo[6] <- ambientsNsd
+ambNinfo[7] <- ambientsNcount
+ambCinfo <- ambientsC[1:4,1]
+ambCinfo[5] <- ambientsCmean
+ambCinfo[6] <- ambientsCsd
+ambCinfo[7] <- ambientsCcount
+Labels <- c("Amb1","Amb2","Amb3","Amb4","Mean", "Std", "Count")
+
+ambinfoDF <- data.frame(Labels,ambNinfo,ambCinfo)
+ambinfoDF$GCrun <- runsheet$GCRun[1:7]
+
+
+
+# check on time 0 values inside chambers
+
+timezeroN <- subset(vialDF, vialDF$TimePt==0, select=c(N2Oppm))
+timezeroC <- subset(vialDF, vialDF$TimePt==0, select=c(CO2ppm))
+timezeroLabels <- subset(vialDF, vialDF$TimePt==0, select=c(SampleName))
+
+timezeroNmean <- mean(timezeroN$N2Oppm)
+timezeroNsd <- sd(timezeroN$N2Oppm)
+timezeroNCV <- timezeroNsd/timezeroNmean
+timezeroNsdallow <- 2
+timezeroNupperlimit <- timezeroNmean+timezeroNsdallow*timezeroNsd
+timezeroNlowerlimit <- timezeroNmean-timezeroNsdallow*timezeroNsd
+
+timezeroCmean <- mean(timezeroC$CO2ppm)
+timezeroCsd <- sd(timezeroC$CO2ppm)
+timezeroCCV <- timezeroCsd/timezeroCmean
+timezeroCsdallow <- 2
+timezeroCupperlimit <- timezeroCmean+timezeroCsdallow*timezeroCsd
+timezeroClowerlimit <- timezeroCmean-timezeroCsdallow*timezeroCsd
+
+# add on summary info at the end
+tmplength <- dim(timezeroN)[1]
+
+timezeroNinfo <- timezeroN[1:tmplength,1]
+timezeroCinfo <- timezeroC[1:tmplength,1]
+
+timezeroNinfo[(tmplength+1):(tmplength+6)] <- c(timezeroNmean,timezeroNsd,timezeroNCV,timezeroNsdallow,timezeroNupperlimit,timezeroNlowerlimit)
+timezeroCinfo[(tmplength+1):(tmplength+6)] <- c(timezeroCmean,timezeroCsd,timezeroCCV,timezeroCsdallow,timezeroCupperlimit,timezeroClowerlimit)
+
+timezeroLabs <- as.data.frame(as.matrix(timezeroLabels),stringsAsFactors=F)
+timezeroLabs <- timezeroLabs$SampleName
+
+timezeroLabs[(tmplength+1):(tmplength+6)]<-c("time zero mean", "time zero sd", "time zero CV", "time zero sd allow" ,"time zero upper limit", "time zero lower limit")
+
+timezeroDF <- data.frame(timezeroLabs,timezeroNinfo,timezeroCinfo)
+timezeroDF$GCrun <- runsheet$GCRun[1:(tmplength+6)]
 
 
 
 
 # print warnings
 
+# are the standards curves poor quality?
+
+
+# is there high variability in the ambient vials?
+
+
+# is there high variability in the time zero vials?
 
 
 
@@ -230,8 +295,18 @@ vialDF$ngC_cm3_CO2 <- ngC_cm3_CO2
 vialDF$GCrun <- runsheet$GCRun
 # vialDF <- subset(vialDF, select = -c(GCdate) ) # needed this because I changed my mind about my labels
 
-# save vialDF
+# save vialDF, ambinfoDF, timezeroDF as csv
 write.csv(vialDF, file="~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rcode/PRACTICE/vialDF.csv", row.names=FALSE)
+
+write.csv(ambinfoDF, file="~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rcode/PRACTICE/ambinfoDF.csv", row.names=FALSE)
+
+write.csv(timezeroDF, file="~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rcode/PRACTICE/timezeroDF.csv", row.names=FALSE)
+
+
+# save warnings as txt? see googled solutions for this if desired
+
+
+
 
 ###### Q: how to best loop this so the correct run sheet gets brought in and the vialDF gets saved correctly?  think of a good data storage option for this
 ###### Q: save these files individually but also build one huge vialDF that combines every run?  i could do that in a separete R script, too...
