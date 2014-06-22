@@ -188,7 +188,7 @@ vialDF$CO2ppm <- CO2ppm
 
 
 ########################################################################
-# CONVERT TO MASS PER VOLUUME FROM PPM
+# CONVERT TO MASS PER VOLUME FROM PPM
 
 # tmp-volume-land use dataframe
 ngN_cm3_correction <- c(341.2262)
