@@ -2,6 +2,19 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
+# this version of the GC-Rcode file loops through all the GC files to process them
+
+########################################################################
+# SET UP INFO FOR THIS GC RUN
+
+locationrunsheet # where is the runsheet info csv
+locationdetectors # where are the ecd, fid and tcd files
+
+filesavename # how to save vialDF csv (give it a number and a name, like vialDF_1_201403boxU or something like that)
+
+# line 129-130 need to go
+
+#file = paste("data",i,".RData", sep="")
 
 
 ########################################################################
@@ -111,12 +124,6 @@ stdtabCO2[2,1:2]<-0
 
 # build standards curves
 
-# note that these are a bit off from the excel doc, because I'm here using standards that got the tmp correction when correcting for ambients
-# from here, set new vectors that match the excel so you can continue to compare (delete this part later)
-
-stdtabN2O$N2Oc <- c(15.2058625, 84.7365125, 140.5202125) # TMP!!!!
-stdtabCO2$CO2c <- c(61.487075, 0, 259.881775) # TMP!!!!
-
 # high level N2O calibration
 lmN2Ohigh <- lm(stdtabN2O$ppm ~ stdtabN2O$N2Oc)
 lmN2Ohigh_intercept <- coef(summary(lmN2Ohigh))["(Intercept)","Estimate"]
@@ -157,7 +164,7 @@ lmCO2low_pearsonsR2 <- lmCO2low_cor^2
 
 # get ppm correction columns, save to dataframe
 
-# ifelse test (use high or low standards curve?)
+# ifelse test (determine whether to use high or low standards curve)
 N2Oppm <- ifelse(N2Oc>stdtabN2O$N2Oc[2], N2Oc*lmN2Ohigh_slope+lmN2Ohigh_intercept, N2Oc*lmN2Olow_slope+lmN2Olow_intercept)
 CO2ppm <- ifelse(CO2c>stdtabCO2$CO2c[1], CO2c*lmCO2high_slope+lmCO2high_intercept, CO2c*lmCO2low_slope+lmCO2low_intercept)
 
