@@ -1,4 +1,5 @@
-# processing GC data - fluxes
+# GC-Rcode.R
+# processing GC data - converting raw GC data into mass per volume
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 

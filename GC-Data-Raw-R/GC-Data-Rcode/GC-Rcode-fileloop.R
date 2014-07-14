@@ -1,4 +1,5 @@
-# processing GC data - fluxes
+# GC-Rcode-fileloop.R
+# processing GC data - converting raw GC data into mass per volume
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
@@ -18,21 +19,7 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
   
 # can use as test
 #filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
-
-
-########################################################################
-# MAKE ALL RUNSHEETS FROM XLS TO TXT
-
-#install.packages("XLConnect")
-#library(XLConnect)
-#install.packages("gdata")
-library(gdata)
-
-# myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
-# runsheet <- read.delim(myfilerunsheet)
-# 
-# myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".xlsx", sep = "")
-# runsheet <- read.xls(myfilerunsheet)
+filestoprocess = "20140310_U"
 
 
 ########################################################################
@@ -127,9 +114,15 @@ for (i in 1:length(filestoprocess)) {
   voltotaltmp <- volvial + volsampletmp
   
   # get volume correction columns, save to dataframe
-  N2Oc <- ((voltotaltmp * vialDF$N2Oraw) - (volvial * ambientsNmean)) / volsampletmp
-  CO2c <- ((voltotaltmp * vialDF$CO2raw) - (volvial * ambientsCmean)) / volsampletmp
-  CH4c <- ((voltotaltmp * vialDF$CH4raw) - (volvial * ambientsCHmean)) / volsampletmp
+  # venterea excel it's not temp controlled for standards, but yes temp controlled for others
+  N2Oc <- ((voltotal * vialDF$N2Oraw[1:5]) - (volvial * ambientsNmean)) / volsample
+  CO2c <- ((voltotal * vialDF$CO2raw[1:5]) - (volvial * ambientsCmean)) / volsample
+  CH4c <- ((voltotal * vialDF$CH4raw[1:5]) - (volvial * ambientsCHmean)) / volsample
+  last <- length(vialDF$N2Oraw)
+  # tmp correction option (for vials that aren't standards)
+  N2Oc[6:last] <- ((voltotaltmp * vialDF$N2Oraw[6:last]) - (volvial * ambientsNmean)) / volsampletmp
+  CO2c[6:last] <- ((voltotaltmp * vialDF$CO2raw[6:last]) - (volvial * ambientsCmean)) / volsampletmp
+  CH4c[6:last] <- ((voltotaltmp * vialDF$CH4raw[6:last]) - (volvial * ambientsCHmean)) / volsampletmp
   vialDF$N2Oc <- N2Oc
   vialDF$CO2c <- CO2c
   vialDF$CH4c <- CH4c
@@ -227,7 +220,7 @@ for (i in 1:length(filestoprocess)) {
   ngC_cm3_correction <- c(0.1462398)
   
   LU <- c("F","M","S")
-  degC <- c(25,25,25)
+  degC <- c(20,20,20)
   voltmpcorrN2O <- ngN_cm3_correction/(degC+273.15)
   voltmpcorrCO2 <- ngC_cm3_correction/(degC+273.15)
   
@@ -394,6 +387,13 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 
 
 
+########################################################################
+# NOTES AND TESTING
+
+
+# testing update: for filestoprocess = "20140310_U" this matches the venterea excel exactly!
+# thing that was keeping them different was the temperature correction.  above, the standards don't get a temperature correction, but everything else does
+
 
 
 ########################################################################
@@ -401,7 +401,7 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 
 ##### export images of the standard curves
 ##### what about low or no pressure vials?  remove these data points.  or do so when scrubbing for low R2 values on flux calcs
-
+##### fix warnings so they export in a more readable way
 
 
 
