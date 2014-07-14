@@ -19,7 +19,7 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
   
 # can use as test
 #filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
-filestoprocess = "20140310_U"
+# filestoprocess = "20140310_U" # used for testing
 
 
 ########################################################################

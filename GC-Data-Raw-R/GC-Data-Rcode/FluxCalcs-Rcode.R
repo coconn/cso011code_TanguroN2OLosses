@@ -10,7 +10,7 @@
 vialDFfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/vialDFfull.csv", stringsAsFactors=FALSE)
 
 # make new column to ensure no repeats (easycallname = unique per chamber)
-vialDFfull$easycallname <- do.call(paste, c(vialDFfull[c("Site", "Chamber", "SampleDate")], sep = "_")) 
+vialDFfull$easycallname <- do.call(paste, c(vialDFfull[c("Site", "SampleDate", "Chamber")], sep = "_")) 
 
 #in case I want to see all the names outside of R environment
 #write.csv(vialDFfull, file=paste("vialDFfull_prac.csv", sep = ""), row.names=FALSE)  
@@ -211,7 +211,7 @@ write.csv(outputdffull, file=paste(pathsavefiles, "fluxesfull.csv", sep = ""), r
 ## save as pdf figures as one pdf doc
 setwd(pathsavefigs)
 ff <- dir(pattern="AppendFlux")
-outFileName <- "FluxFiguresFull.pdf"
+outFileName <- "Append_FluxFiguresFull.pdf"
 ## Make a system call to pdftk
 system2(command = "pdftk", args = c(shQuote(ff), "cat output", shQuote(outFileName)))
 
