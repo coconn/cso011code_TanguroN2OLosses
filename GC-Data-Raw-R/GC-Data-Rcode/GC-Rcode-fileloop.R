@@ -9,26 +9,39 @@
 # WHAT FILES ARE WE LOOPING THROUGH
 
 # set files to process and path to folder with standardized naming info
-filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
+standardizedfn <- read.delim("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/standardizedfilenames.txt", stringsAsFactors=FALSE)
+filestoprocess <- standardizedfn$standardizedfilenames
 # where to get inputs
 path = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-standardizedfilenames/"
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/"
   
-# OR
-#filestoprocess <- read.delim("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/standardizedfilenames.txt") # how make this into a character string?
-# OR
-# filestoprocess = c("Even","Carbon","ClimateReg","HabQual") # list files here
+# can use as test
+#filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
 
-stringAsFactors=FALSE
-bob$phenotype <- as.character(bob$phenotype)
 
-i <- sapply(bob, is.factor)
-bob[i] <- lapply(bob[i],as.character)
+########################################################################
+# MAKE ALL RUNSHEETS FROM XLS TO TXT
+
+#install.packages("XLConnect")
+#library(XLConnect)
+#install.packages("gdata")
+library(gdata)
+
+# myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
+# runsheet <- read.delim(myfilerunsheet)
+# 
+# myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".xlsx", sep = "")
+# runsheet <- read.xls(myfilerunsheet)
 
 
 ########################################################################
 # BEGIN LOOP
+
+## pre-start output df
+vialDFfull <- data.frame()
+ambinfoDFfull <- data.frame()
+timezeroDFfull <- data.frame()
 
 
 for (i in 1:length(filestoprocess)) {
@@ -41,13 +54,15 @@ for (i in 1:length(filestoprocess)) {
   ## bring in data
   
   # define files for this loop
-  myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
+#   myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
+  myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".xlsx", sep = "")
   myfileecd <- paste(path, "ecd_", filestoprocess[i], ".txt", sep = "")
   myfilefid <- paste(path, "fid_", filestoprocess[i], ".txt", sep = "")
   myfiletcd <- paste(path, "tcd_", filestoprocess[i], ".txt", sep = "")
   
   # bring in GC data
-  runsheet <- read.delim(myfilerunsheet)
+#   runsheet <- read.delim(myfilerunsheet)
+  runsheet <- read.xls(myfilerunsheet)
   ecdN2O <- read.delim(myfileecd, header = FALSE)
   fidCH4 <- read.delim(myfilefid, header = FALSE)
   tcdCO2 <- read.delim(myfiletcd, header = FALSE)
@@ -298,29 +313,42 @@ for (i in 1:length(filestoprocess)) {
   ########################################################################
   # PRINT WARNINGS
   
+  # save to txt file
+  mywarnings <- paste(pathsavefiles, "warnings_", filestoprocess[i], ".csv", sep = "")
+  
   # are the standards curves poor quality?
   
-  print(paste("STD CURVES INFO: the Pearson's R^2 for N2O HIGH was ", round(lmN2Ohigh_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))  
-  print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for N2O HIGH was ", round(lmN2Ohigh_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n")
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   
   # is there high variability in the ambient vials?
   
   ind = which(ambinfoDF$Labels=="CV")
-  print(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  cat(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   
   # is there high variability in the time zero vials?
   
   ind = which(timezeroDF$timezeroLabs=="time zero CV")
+  
+  cat(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  #cat(HERE, file=mywarnings,sep="\n",append=TRUE)
+  
+  # print these statements for the viewer to see
+  print(paste("STD CURVES INFO: the Pearson's R^2 for N2O HIGH was ", round(lmN2Ohigh_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))  
+  print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   
   
-  ###### Q: save these summary statements as text
-  
-  
+  # readline(prompt = "ready to move on?  press return.  ")
   
   ########################################################################
   # SAVE THINGS
@@ -336,36 +364,34 @@ for (i in 1:length(filestoprocess)) {
   # save vialDF, ambinfoDF, timezeroDF as csv
   write.csv(vialDF, file=mycsvvialDF, row.names=FALSE)
   write.csv(ambinfoDF, file=mycsvambinfoDF, row.names=FALSE)
-  write.csv(timezeroDF, file=mycsvtimezeroDF, row.names=FALSE)
+  write.csv(timezeroDF, file=mycsvtimezeroDF, row.names=FALSE)  
   
+  # bind vialDF, ambinfoDF, timezeroDF onto running dfs
+  vialDFfull <- rbind(vialDFfull, vialDF)
+  ambinfoDFfull <- rbind(ambinfoDFfull, ambinfoDF)
+  timezeroDFfull <- rbind(timezeroDFfull, timezeroDF)
+
 
   
-  ###### Q: save these summary statements as text
-  
-  
-  
 }
-  
-  
+
+
+# write full DF files as csv files  
+write.csv(vialDFfull, file=paste(pathsavefiles, "vialDFfull.csv", sep = ""), row.names=FALSE)  
+write.csv(ambinfoDFfull, file=paste(pathsavefiles, "ambinfoDFfull.csv", sep = ""), row.names=FALSE)  
+write.csv(timezeroDFfull, file=paste(pathsavefiles, "timezeroDFfull.csv", sep = ""), row.names=FALSE)  
+
+# write all warnings into a single file
+warningsfiles <- list.files(path=pathsavefiles, pattern = "warnings_*", full.names=TRUE, ignore.case = TRUE)
+dataset <- do.call("rbind",lapply(warningsfiles, FUN=function(files){read.table(files, header=FALSE, sep="\t")}))
+# why do the first rows print weird?  fix this eventually.
+write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.names=FALSE)  
+
+
+
 ########################################################################
 # END LOOP
 
-
-
-fileconn <- file("output.txt")
-writeLines(c("hello","world"),fileconn)
-close(fileconn)
-
-sink("output.txt")
-cat("hello")
-cat("/n")
-cat("world")
-sink()
-
-# USE THIS
-cat("hello", file="output2.txt",sep="\n")
-cat("world", file="output2.txt",sep="\n",append=TRUE)
-cat("third", file="output2.txt",append=TRUE)
 
 
 
@@ -373,7 +399,8 @@ cat("third", file="output2.txt",append=TRUE)
 ########################################################################
 # POSSIBLE TO DO
 
-##### what about low or no pressure vials? remove these data points.  or do so when scrubbing for low R2 values on flux calcs
+##### export images of the standard curves
+##### what about low or no pressure vials?  remove these data points.  or do so when scrubbing for low R2 values on flux calcs
 
 
 
