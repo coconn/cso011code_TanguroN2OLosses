@@ -128,6 +128,7 @@ for (i in 1:length(fluxcalclist)) {
     outputdf$QuadSlope <- quadslope_N
     outputdf$Quad2der <- quad2der_N
     outputdf$QuadFlux <- quadfluxN
+    outputdf$FluxID <- fluxhere
     # bind onto output table
     outputdffull <- rbind(outputdffull, outputdf)
     # put into a df (CO2)
@@ -141,6 +142,7 @@ for (i in 1:length(fluxcalclist)) {
     outputdf$QuadSlope <- quadslope_C
     outputdf$Quad2der <- quad2der_C
     outputdf$QuadFlux <- quadfluxC
+    outputdf$FluxID <- fluxhere
     # bind onto output table
     outputdffull <- rbind(outputdffull, outputdf)
     
@@ -239,6 +241,7 @@ system2(command = "pdftk", args = c(shQuote(ff), "cat output", shQuote(outFileNa
 # POSSIBLE TO DO
 
 ###### don't forget to do all of this for CH4
+###### take out vials that had low or no pressure
 
 
 
