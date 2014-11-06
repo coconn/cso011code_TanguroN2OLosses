@@ -52,6 +52,10 @@ grid.arrange(p1nloess, p1cloess, nrow = 2, ncol = 1) # great, this works!  looks
 grid.arrange(p2n, p2c, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
 grid.arrange(p2nloess, p2cloess, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
 
+# grid arrange, only one row at a time
+grid.arrange(p2n, nrow = 1, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+grid.arrange(p2c, nrow = 1, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+
 
 
 
