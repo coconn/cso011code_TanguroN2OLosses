@@ -59,6 +59,44 @@ grid.arrange(p2c, nrow = 1, ncol = 1) # great, this works!  looks a little ugly,
 
 
 
+########################################################################
+# LAND USE COMPARISONS - ONLY WET SEASON
+
+require(ggplot2)
+require(gridExtra)
+
+# subset out wet season when calling ggplot
+
+# quad - facet by site
+pw1n <- ggplot(subset(fluxessitesummary, SampleDate2 > "2013/11/01"), aes(x=SampleDate2, y=meanfluxN2Oq, color=color.use)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("ngN/cm2/hr (quad fit)")
+pw1nloess <- pw1n + geom_smooth(size = 1.5, fill="#333333", colour="black")
+
+pw1c <- ggplot(subset(fluxessitesummary, SampleDate2 > "2013/11/01"), aes(x=SampleDate2, y=meanfluxCO2q, color=color.use)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("ngC/cm2/hr (quad fit)")
+pw1cloess <- pw1c + geom_smooth(size = 1.5, fill="#333333", colour="black")
+
+
+# linear - facet by site
+pw2n <- ggplot(subset(fluxessitesummary, SampleDate2 > "2013/11/01"), aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("ngN/cm2/hr (linear fit)")
+pw2nloess <- pw2n + geom_smooth(size = 1.5, fill="#333333", colour="black")
+
+pw2c <- ggplot(subset(fluxessitesummary, SampleDate2 > "2013/11/01"), aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("ngC/cm2/hr (linear fit)")
+pw2cloess <- pw2c + geom_smooth(size = 1.5, fill="#333333", colour="black")
+
+
+# grid.arrange
+grid.arrange(pw1n, pw1c, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+grid.arrange(pw1nloess, pw1cloess, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+grid.arrange(pw2n, pw2c, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+grid.arrange(pw2nloess, pw2cloess, nrow = 2, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+
+# grid arrange, only one row at a time
+grid.arrange(pw2n, nrow = 1, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+grid.arrange(pw2c, nrow = 1, ncol = 1) # great, this works!  looks a little ugly, but this is the right thing and I'll play with the 
+
+
+
+
+
 
 ########################################################################
 # SITE PATTERNS - FERT EFFECT CAPTURED?
