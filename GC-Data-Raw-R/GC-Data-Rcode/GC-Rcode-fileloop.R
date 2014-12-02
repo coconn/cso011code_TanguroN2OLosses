@@ -5,6 +5,14 @@
 
 # this version of the GC-Rcode file loops through all the GC files to process them
 
+# output products:
+# vialDFfull.csv
+# ambinfoDFfull.csv
+# timezeroDFfull.csv
+# warningsfull.csv
+
+# outputs feed into FluxCalcs-Rcode.R
+
 
 ########################################################################
 # WHAT FILES ARE WE LOOPING THROUGH

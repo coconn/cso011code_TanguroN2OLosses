@@ -3,6 +3,12 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
+# requires files created in GC-Rcode-fileloop.R
+
+# output products:
+# fluxesfull.csv : master csv of fluxes
+# Append_FluxFiguresFull.pdf : shows each flux fit
+
 
 ########################################################################
 # BRING IN DATA, MAKE DATAFRAME

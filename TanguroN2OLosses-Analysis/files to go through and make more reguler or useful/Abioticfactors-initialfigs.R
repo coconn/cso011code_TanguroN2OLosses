@@ -3,6 +3,8 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
+# currently all this file does is create that crazy figure that I showed Eric with soiltmploess, soilmoisloess, no2linloess, co2linloess in a bunch of rows
+
 
 
 ########################################################################
@@ -11,15 +13,12 @@
 fluxesfullmerge <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Combo-Datasets/fluxesfullmerge.csv", stringsAsFactors=FALSE)
 
 
-
-
-
-
 ########################################################################
 # ABIOTIC FACTOR VS. TIME PLOTS - NOTHING FANCY
 
 require(ggplot2)
 require(gridExtra)
+library(scales)
 
 fluxesfullmerge$SampleDate2 <- as.Date(fluxesfullmerge$SampleDate2)
 
@@ -39,8 +38,28 @@ no2linloess <- no2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") 
 co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2")
 co2linloess <- co2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
-# grid.arrange
+# where to save figure
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Abioticfactors-initialfigs/"
+# grid.arrange and save
+png(file = paste(pathsavefigures, "Abioticfactors-initialfigs_hobbielabworkshop.png", sep=""),width=10,height=14,units="in",res=400)
 grid.arrange(soiltmploess, soilmoisloess, no2linloess, co2linloess, nrow = 4, ncol = 1)
+dev.off()
+
+
+
+
+
+
+# # subset out wet season when calling ggplot
+# 
+# # quad - facet by site
+# # wet season only
+# soilmoisfig1 <- ggplot(subset(abioticfactors, SampleDate2 > "2013/11/01"), aes(x=SampleDate2, y=SoilMoisPercent, color=color.use)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("% Soil Moisture")
+# soilmoisfig1loess <- soilmoisfig1 + geom_smooth(size = 1.5, fill="#333333", colour="black")
+
+
+
+
 
 
 # grid arrange going by col not row
@@ -93,6 +112,7 @@ grid.arrange(soiltmploess, soilmoisloess, no2linloess, co2linloess, nrow = 4, nc
 # POSSIBLE TO DO
 
 ###### don't forget to do all of this for CH4
+
 
 
 

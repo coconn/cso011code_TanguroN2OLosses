@@ -3,6 +3,7 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
+### OBSOLETE - this ended up being the practice for GC-Rcode-fileloop.R, the true analysis file
 
 
 ########################################################################
