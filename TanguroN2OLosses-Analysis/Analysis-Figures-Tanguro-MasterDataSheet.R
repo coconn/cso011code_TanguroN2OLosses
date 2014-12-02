@@ -1,4 +1,4 @@
-# Abioticfactors-initialfigs.R
+# Analysis-Figures-Tanguro-MasterDataSheet.R
 # initial soil data to preliminary figures
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
@@ -10,7 +10,7 @@
 ########################################################################
 # BRING IN DATA / PREP
 
-fluxesfullmerge <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Combo-Datasets/fluxesfullmerge.csv", stringsAsFactors=FALSE)
+fluxesfullmerge <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Tanguro-MasterDataSheet.csv", stringsAsFactors=FALSE)
 
 
 ########################################################################
@@ -39,7 +39,7 @@ co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=Li
 co2linloess <- co2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
 # where to save figure
-pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Abioticfactors-initialfigs/"
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # grid.arrange and save
 png(file = paste(pathsavefigures, "Abioticfactors-initialfigs_hobbielabworkshop.png", sep=""),width=10,height=14,units="in",res=400)
 grid.arrange(soiltmploess, soilmoisloess, no2linloess, co2linloess, nrow = 4, ncol = 1)
