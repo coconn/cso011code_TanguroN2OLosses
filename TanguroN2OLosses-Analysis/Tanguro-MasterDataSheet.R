@@ -45,9 +45,21 @@ fluxesfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-R
 # merge
 fluxesfullmerge <- merge(abioticfactors, fluxesfull, all=TRUE)
 
+
 # sort by date
 library(plyr)
 fluxesfullmerge2 <- arrange(fluxesfullmerge,desc(SampleDate))
+
+# make sure that no sites are still labeled SD or SM
+#site
+fluxesfullmerge2$Site <- gsub("SM","S3", fluxesfullmerge2$Site, fixed=TRUE)
+fluxesfullmerge2$Site <- gsub("SD","S2", fluxesfullmerge2$Site, fixed=TRUE)
+# easysitename
+fluxesfullmerge2$easysitename <- gsub("SM_","S3_", fluxesfullmerge2$easysitename, fixed=TRUE)
+fluxesfullmerge2$easysitename <- gsub("SD_","S2_", fluxesfullmerge2$easysitename, fixed=TRUE)
+#fluxid
+fluxesfullmerge2$FluxID <- gsub("SM_","S3_", fluxesfullmerge2$FluxID, fixed=TRUE)
+fluxesfullmerge2$FluxID <- gsub("SD_","S2_", fluxesfullmerge2$FluxID, fixed=TRUE)
 
 # save as csv
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/"

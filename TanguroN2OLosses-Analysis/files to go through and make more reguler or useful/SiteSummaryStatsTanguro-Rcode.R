@@ -82,75 +82,75 @@ dim(fluxesfull)[1]/2 # sample size of chambers (div by two because each chamber 
 
 # for now, let's just use the quadratic fluxes
 
-
-## list of every site
-fluxesfull$easysitename <- do.call(paste, c(fluxesfull[c("Site", "SampleDate")], sep = "_")) 
-sitesummarylist <- unique(fluxesfull$easysitename)
-length(sitesummarylist)
-
-## pre-start output df
-outputdffull <- data.frame()
-
-
-for (i in 1:length(sitesummarylist)) {
-  
-  ## get each site id
-  
-  sitehere <- sitesummarylist[i]
-  
-  ## get linear flux info
-  
-  # eventually make this an ifelse system where if the second derivative is positive (meaning the fit is accelerating up), then use the linear fit
-  # perhaps also use ifelse to make sure that the R^2 for whatever fit you use is acceptable
-  meanfluxN2Ol <- mean(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  meanfluxCO2l <- mean(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  sdfluxN2Ol <- sd(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  sdfluxCO2l <- sd(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  meanR2N2Ol <- mean(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  meanR2CO2l <- mean(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  sdR2N2Ol <- sd(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  sdR2CO2l <- sd(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  
-  SampleDate <- unique(fluxesfull$SampleDate[(fluxesfull$easysitename)==sitehere])
-  LUtype <- unique(fluxesfull$LUtype[(fluxesfull$easysitename)==sitehere])
-  Site <- unique(fluxesfull$Site[(fluxesfull$easysitename)==sitehere])
-  
-  outputdf <- data.frame(sitehere,SampleDate,Site,LUtype,meanfluxN2Ol,sdfluxN2Ol,meanR2N2Ol,sdR2N2Ol,meanfluxCO2l,sdfluxCO2l,meanR2CO2l,sdR2CO2l)
-  
-  ## get quad flux info
-  
-  # eventually make this an ifelse system where if the second derivative is positive (meaning the fit is accelerating up), then use the linear fit
-  # perhaps also use ifelse to make sure that the R^2 for whatever fit you use is acceptable
-  meanfluxN2Oq <- mean(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  meanfluxCO2q <- mean(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  sdfluxN2Oq <- sd(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  sdfluxCO2q <- sd(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  meanR2N2Oq <- mean(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  meanR2CO2q <- mean(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  sdR2N2Oq <- sd(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
-  sdR2CO2q <- sd(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
-  
-  SampleDate <- unique(fluxesfull$SampleDate[(fluxesfull$easysitename)==sitehere])
-  LUtype <- unique(fluxesfull$LUtype[(fluxesfull$easysitename)==sitehere])
-  Site <- unique(fluxesfull$Site[(fluxesfull$easysitename)==sitehere])
-  
-  outputdfcbind <- data.frame(meanfluxN2Oq,sdfluxN2Oq,meanR2N2Oq,sdR2N2Oq,meanfluxCO2q,sdfluxCO2q,meanR2CO2q,sdR2CO2q)
-  
-  ## combine data
-  
-  # bind linear and quad flux info into one row
-  outputdf <- cbind(outputdf, outputdfcbind)
-  # bind onto output table
-  outputdffull <- rbind(outputdffull, outputdf)
-  
-}
-
-## save outputdffull as csv file
-# where to save outputs
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Flux-Data-Rprocessed/"
-# this is currently straightforward linear and Venterea quad flux only (no instantaneous flux, removing 4th vial, etc.)
-write.csv(outputdffull, file=paste(pathsavefiles, "fluxessitesummary.csv", sep = ""), row.names=FALSE)  
-
+# 
+# ## list of every site
+# fluxesfull$easysitename <- do.call(paste, c(fluxesfull[c("Site", "SampleDate")], sep = "_")) 
+# sitesummarylist <- unique(fluxesfull$easysitename)
+# length(sitesummarylist)
+# 
+# ## pre-start output df
+# outputdffull <- data.frame()
+# 
+# 
+# for (i in 1:length(sitesummarylist)) {
+#   
+#   ## get each site id
+#   
+#   sitehere <- sitesummarylist[i]
+#   
+#   ## get linear flux info
+#   
+#   # eventually make this an ifelse system where if the second derivative is positive (meaning the fit is accelerating up), then use the linear fit
+#   # perhaps also use ifelse to make sure that the R^2 for whatever fit you use is acceptable
+#   meanfluxN2Ol <- mean(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   meanfluxCO2l <- mean(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   sdfluxN2Ol <- sd(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   sdfluxCO2l <- sd(fluxesfull$LinearFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   meanR2N2Ol <- mean(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   meanR2CO2l <- mean(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   sdR2N2Ol <- sd(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   sdR2CO2l <- sd(fluxesfull$LinearR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   
+#   SampleDate <- unique(fluxesfull$SampleDate[(fluxesfull$easysitename)==sitehere])
+#   LUtype <- unique(fluxesfull$LUtype[(fluxesfull$easysitename)==sitehere])
+#   Site <- unique(fluxesfull$Site[(fluxesfull$easysitename)==sitehere])
+#   
+#   outputdf <- data.frame(sitehere,SampleDate,Site,LUtype,meanfluxN2Ol,sdfluxN2Ol,meanR2N2Ol,sdR2N2Ol,meanfluxCO2l,sdfluxCO2l,meanR2CO2l,sdR2CO2l)
+#   
+#   ## get quad flux info
+#   
+#   # eventually make this an ifelse system where if the second derivative is positive (meaning the fit is accelerating up), then use the linear fit
+#   # perhaps also use ifelse to make sure that the R^2 for whatever fit you use is acceptable
+#   meanfluxN2Oq <- mean(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   meanfluxCO2q <- mean(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   sdfluxN2Oq <- sd(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   sdfluxCO2q <- sd(fluxesfull$QuadFlux[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   meanR2N2Oq <- mean(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   meanR2CO2q <- mean(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   sdR2N2Oq <- sd(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="N2O"])
+#   sdR2CO2q <- sd(fluxesfull$QuadR2[(fluxesfull$easysitename)==sitehere & (fluxesfull$GasType)=="CO2"])
+#   
+#   SampleDate <- unique(fluxesfull$SampleDate[(fluxesfull$easysitename)==sitehere])
+#   LUtype <- unique(fluxesfull$LUtype[(fluxesfull$easysitename)==sitehere])
+#   Site <- unique(fluxesfull$Site[(fluxesfull$easysitename)==sitehere])
+#   
+#   outputdfcbind <- data.frame(meanfluxN2Oq,sdfluxN2Oq,meanR2N2Oq,sdR2N2Oq,meanfluxCO2q,sdfluxCO2q,meanR2CO2q,sdR2CO2q)
+#   
+#   ## combine data
+#   
+#   # bind linear and quad flux info into one row
+#   outputdf <- cbind(outputdf, outputdfcbind)
+#   # bind onto output table
+#   outputdffull <- rbind(outputdffull, outputdf)
+#   
+# }
+# 
+# ## save outputdffull as csv file
+# # where to save outputs
+# pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Flux-Data-Rprocessed/"
+# # this is currently straightforward linear and Venterea quad flux only (no instantaneous flux, removing 4th vial, etc.)
+# write.csv(outputdffull, file=paste(pathsavefiles, "fluxessitesummary.csv", sep = ""), row.names=FALSE)  
+# 
 
 
 
