@@ -36,6 +36,7 @@ pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Flu
 ## list of every site
 fluxcalclist <- unique(vialDFfull$easycallname)
 # get rid of NA ones
+# this gets rid of pit samples and samples from the travel and leak tests
 i1 <- grepl("NA", fluxcalclist) 
 fluxcalclist <- fluxcalclist[!i1]
 length(fluxcalclist)

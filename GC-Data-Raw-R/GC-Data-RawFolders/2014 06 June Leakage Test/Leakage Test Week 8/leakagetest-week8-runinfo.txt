@@ -1,0 +1,8 @@
+email subject line: Time 8 gas flux
+[note that AU = autocrimped.  the non-AU samples were crimped with the hand crimper.]
+
+See attached for the week 8 gas flux values.  I used the same run order as week 1 for a total of 24.
+
+Info about run order from previous:
+"3 each of M1, M2, 3, 10 and 3K, 4xamb, then M1, M2, 3, 10 and 3K filled and immediately ran.  Total of 24."
+

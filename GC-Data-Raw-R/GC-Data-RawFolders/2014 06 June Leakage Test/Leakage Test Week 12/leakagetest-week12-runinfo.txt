@@ -1,0 +1,10 @@
+email subject line: Time 12 gas flux vials
+[note that AU = autocrimped.  the non-AU samples were crimped with the hand crimper.]
+
+See attached.  Used the same order as before with auto samples at end, ie.
+3 x M1, M2, 3N, 10N, 3K
+4 x amb
+Filled M1, M2, 3N, 10N, 3K
+Above as auto.
+
+43 total.

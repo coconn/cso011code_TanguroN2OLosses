@@ -29,6 +29,7 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
 #filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
 # filestoprocess = "20140310_U" # used for testing
 
+require(xlsx)
 
 ########################################################################
 # BEGIN LOOP
@@ -57,7 +58,7 @@ for (i in 1:length(filestoprocess)) {
   
   # bring in GC data
 #   runsheet <- read.delim(myfilerunsheet)
-  runsheet <- read.xls(myfilerunsheet)
+  runsheet <- read.xlsx(myfilerunsheet,1)
   ecdN2O <- read.delim(myfileecd, header = FALSE)
   fidCH4 <- read.delim(myfilefid, header = FALSE)
   tcdCO2 <- read.delim(myfiletcd, header = FALSE)
@@ -326,16 +327,16 @@ for (i in 1:length(filestoprocess)) {
   
   # is there high variability in the ambient vials?
   
-  ind = which(ambinfoDF$Labels=="CV")
-  cat(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
-  cat(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  indAMB = which(ambinfoDF$Labels=="CV")
+  cat(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   
   # is there high variability in the time zero vials?
   
-  ind = which(timezeroDF$timezeroLabs=="time zero CV")
+  indTZ = which(timezeroDF$timezeroLabs=="time zero CV")
   
-  cat(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
-  cat(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   #cat(HERE, file=mywarnings,sep="\n",append=TRUE)
   
   # print these statements for the viewer to see
@@ -343,10 +344,10 @@ for (i in 1:length(filestoprocess)) {
   print(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))  
   print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
-  print(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[ind], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   
   
   # readline(prompt = "ready to move on?  press return.  ")
