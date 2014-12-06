@@ -74,139 +74,164 @@ for (i in 1:length(fluxcalclist)) {
     Chamber <- unique(vialDFfull$Chamber[(vialDFfull$easycallname)==fluxhere])
     SampleDate <- unique(vialDFfull$SampleDate[(vialDFfull$easycallname)==fluxhere])
     
+    # before you make the models, set any no pressure vials to NA
+    #i=3
+    nopressure <- vialDFfull$Pressure[(vialDFfull$easycallname)==fluxhere]
+    nopressureid <- which(nopressure=="N")
+    ngN_cm3_N2O[nopressureid] <- NA
+    ngC_cm3_CO2[nopressureid] <- NA
     
-    ## get linear model and info
+    # if there is more than 1 no pressure vial in this flux, skip all the rest
+    checkpressurelength <- sum(!is.na(ngN_cm3_N2O))
     
-    # N
-    lmfitN <- lm(ngN_cm3_N2O ~ TimePt)
-    r2_N <- summary(lmfitN)$r.squared
-    tmpslope_N <- summary(lmfitN)$coefficients[2,1]
-    tmpintc_N <- summary(lmfitN)$coefficients[1,1]
-    # linear flux
-    # mass per area^2 per time
-    lmfluxN <- chambervol * tmpslope_N/chamberarea * 60
-    
-    # C
-    lmfitC <- lm(ngC_cm3_CO2 ~ TimePt)
-    r2_C <- summary(lmfitC)$r.squared
-    tmpslope_C <- summary(lmfitC)$coefficients[2,1]
-    tmpintc_C <- summary(lmfitC)$coefficients[1,1]
-    # linear flux
-    # mass per area^2 per time
-    lmfluxC <- chambervol * tmpslope_C/chamberarea * 60
-    
-    ###### make sure that you understand the flux calcs 
-    ###### (what is the unit that we're trying to cancel out by multiplying by chamber volume?)
-    
-    
-    ## get quadratic model and info
-    
-    # N
-    modelquadN <- lm(ngN_cm3_N2O ~ poly(TimePt, 2, raw=TRUE))
-    quadr2_N <- summary(modelquadN)$r.squared
-    quadslope_N <- summary(modelquadN)$coefficients[2,1]
-    quad2der_N <- summary(modelquadN)$coefficients[3,1]
-    quadinterc_N <- summary(modelquadN)$coefficients[1,1]
-    # quadratic flux
-    # mass per area^2 per time
-    quadfluxN <- chambervol * quadslope_N/chamberarea * 60
-    
-    # C
-    modelquadC <- lm(ngC_cm3_CO2 ~ poly(TimePt, 2, raw=TRUE))
-    quadr2_C <- summary(modelquadC)$r.squared
-    quadslope_C <- summary(modelquadC)$coefficients[2,1]
-    quad2der_C <- summary(modelquadC)$coefficients[3,1]
-    quadinterc_C <- summary(modelquadC)$coefficients[1,1]
-    # quadratic flux
-    # mass per area^2 per time
-    quadfluxC <- chambervol * quadslope_C/chamberarea * 60
-    
-    
-    ## put info into running output file
-    
-    # put into a df (N2O)
-    outputdf <- data.frame(Site,LUtype,Chamber,SampleDate)
-    outputdf$GasType <- c("N2O")
-    outputdf$LinearR2 <- r2_N
-    outputdf$LinearSlope <- tmpslope_N
-    outputdf$LinearInt <- tmpintc_N
-    outputdf$LinearFlux <- lmfluxN
-    outputdf$QuadR2 <- quadr2_N
-    outputdf$QuadSlope <- quadslope_N
-    outputdf$Quad2der <- quad2der_N
-    outputdf$QuadFlux <- quadfluxN
-    outputdf$FluxID <- fluxhere
-    # bind onto output table
-    outputdffull <- rbind(outputdffull, outputdf)
-    # put into a df (CO2)
-    outputdf <- data.frame(Site,LUtype,Chamber,SampleDate)
-    outputdf$GasType <- c("CO2")
-    outputdf$LinearR2 <- r2_C
-    outputdf$LinearSlope <- tmpslope_C
-    outputdf$LinearInt <- tmpintc_C
-    outputdf$LinearFlux <- lmfluxC
-    outputdf$QuadR2 <- quadr2_C
-    outputdf$QuadSlope <- quadslope_C
-    outputdf$Quad2der <- quad2der_C
-    outputdf$QuadFlux <- quadfluxC
-    outputdf$FluxID <- fluxhere
-    # bind onto output table
-    outputdffull <- rbind(outputdffull, outputdf)
-    
-    
-    ## make plot images and save as pdf
-    pdf(paste(pathsavefigs,"AppendFlux_", fluxhere, ".pdf", sep=""), width=7.5, height=3.5)
-    par(mfrow=c(1,2),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
-    
-    # N
-    # make the plot
-    plot(TimePt, ngN_cm3_N2O)
-    abline(lmfitN, col="darkslateblue", lwd=2)
-    # smooth quad line
-    lines(x=seq(min(TimePt), max(TimePt), len=100), y=predict(modelquadN, data.frame(TimePt=seq(min(TimePt), max(TimePt), len=100))), col="darkseagreen4", lwd=2)
-    # lines(TimePt, predict(modelquadN)) # choppy quad line
-    # add info to the plot
-    tmplab = vector('expression',3)
-    tmplab[1] = "Linear Fit"
-    tmplab[2] = substitute(expression(italic(R)^2 == MYVALUE), 
-                           list(MYVALUE = format(r2_N,dig=4)))[2]
-    tmplab[3] = paste("y = ", round(tmpslope_N,4), "x + ", round(tmpintc_N,4), sep="")  
-    legend('topleft', legend = tmplab, bty = 'n',cex=0.7)
-    tmplab2 = vector('expression',3)
-    tmplab2[1] = "Quadratic Fit"
-    tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
-                            list(MYVALUE = format(quadr2_N,dig=4)))[2]
-    tmplab2[3] = paste("y = ", round(quadslope_N,4), "x + ", round(quad2der_N,4), "x^2 + ", round(quadinterc_N,4), sep="")  
-    legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
-    
-    # C
-    # make the plot
-    plot(TimePt, ngC_cm3_CO2)
-    abline(lmfitC, col="darkslateblue", lwd=2)
-    # smooth quad line
-    lines(x=seq(min(TimePt), max(TimePt), len=100), y=predict(modelquadC, data.frame(TimePt=seq(min(TimePt), max(TimePt), len=100))), col="darkseagreen4", lwd=2)
-    # lines(TimePt, predict(modelquadC)) # choppy quad line
-    # add info to the plot
-    tmplab = vector('expression',3)
-    tmplab[1] = "Linear Fit"
-    tmplab[2] = substitute(expression(italic(R)^2 == MYVALUE), 
-                           list(MYVALUE = format(r2_C,dig=4)))[2]
-    tmplab[3] = paste("y = ", round(tmpslope_C,4), "x + ", round(tmpintc_C,4), sep="")  
-    legend('topleft', legend = tmplab, bty = 'n',cex=0.7)
-    tmplab2 = vector('expression',3)
-    tmplab2[1] = "Quadratic Fit"
-    tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
-                            list(MYVALUE = format(quadr2_C,dig=4)))[2]
-    tmplab2[3] = paste("y = ", round(quadslope_C,4), "x + ", round(quad2der_C,4), "x^2 + ", round(quadinterc_C,4), sep="")  
-    legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
-    
-    title(fluxhere, outer=TRUE)
-    dev.off()
-    
-    
+    if(checkpressurelength == 4 || checkpressurelength == 3) 
+    {
+      
+      ## get linear model and info
+      
+      # N
+      lmfitN <- lm(ngN_cm3_N2O ~ TimePt)
+      r2_N <- summary(lmfitN)$r.squared
+      tmpslope_N <- summary(lmfitN)$coefficients[2,1]
+      tmpintc_N <- summary(lmfitN)$coefficients[1,1]
+      # linear flux
+      # mass per area^2 per time
+      lmfluxN <- chambervol * tmpslope_N/chamberarea * 60
+      
+      # C
+      lmfitC <- lm(ngC_cm3_CO2 ~ TimePt)
+      r2_C <- summary(lmfitC)$r.squared
+      tmpslope_C <- summary(lmfitC)$coefficients[2,1]
+      tmpintc_C <- summary(lmfitC)$coefficients[1,1]
+      # linear flux
+      # mass per area^2 per time
+      lmfluxC <- chambervol * tmpslope_C/chamberarea * 60
+      
+      ###### make sure that you understand the flux calcs 
+      ###### (what is the unit that we're trying to cancel out by multiplying by chamber volume?)
+      
+      
+      ## get quadratic model and info
+      
+      # N
+      modelquadN <- lm(ngN_cm3_N2O ~ poly(TimePt, 2, raw=TRUE))
+      quadr2_N <- summary(modelquadN)$r.squared
+      quadslope_N <- summary(modelquadN)$coefficients[2,1]
+      quad2der_N <- summary(modelquadN)$coefficients[3,1]
+      quadinterc_N <- summary(modelquadN)$coefficients[1,1]
+      # quadratic flux
+      # mass per area^2 per time
+      quadfluxN <- chambervol * quadslope_N/chamberarea * 60
+      
+      # C
+      modelquadC <- lm(ngC_cm3_CO2 ~ poly(TimePt, 2, raw=TRUE))
+      quadr2_C <- summary(modelquadC)$r.squared
+      quadslope_C <- summary(modelquadC)$coefficients[2,1]
+      quad2der_C <- summary(modelquadC)$coefficients[3,1]
+      quadinterc_C <- summary(modelquadC)$coefficients[1,1]
+      # quadratic flux
+      # mass per area^2 per time
+      quadfluxC <- chambervol * quadslope_C/chamberarea * 60
+      
+      
+      ## put info into running output file
+      
+      # put into a df (N2O)
+      outputdf <- data.frame(Site,LUtype,Chamber,SampleDate)
+      outputdf$GasType <- c("N2O")
+      outputdf$LinearR2 <- r2_N
+      outputdf$LinearSlope <- tmpslope_N
+      outputdf$LinearInt <- tmpintc_N
+      outputdf$LinearFlux <- lmfluxN
+      outputdf$QuadR2 <- quadr2_N
+      outputdf$QuadSlope <- quadslope_N
+      outputdf$Quad2der <- quad2der_N
+      outputdf$QuadFlux <- quadfluxN
+      outputdf$FluxID <- fluxhere
+      # bind onto output table
+      outputdffull <- rbind(outputdffull, outputdf)
+      # put into a df (CO2)
+      outputdf <- data.frame(Site,LUtype,Chamber,SampleDate)
+      outputdf$GasType <- c("CO2")
+      outputdf$LinearR2 <- r2_C
+      outputdf$LinearSlope <- tmpslope_C
+      outputdf$LinearInt <- tmpintc_C
+      outputdf$LinearFlux <- lmfluxC
+      outputdf$QuadR2 <- quadr2_C
+      outputdf$QuadSlope <- quadslope_C
+      outputdf$Quad2der <- quad2der_C
+      outputdf$QuadFlux <- quadfluxC
+      outputdf$FluxID <- fluxhere
+      # bind onto output table
+      outputdffull <- rbind(outputdffull, outputdf)
+      
+      
+      ## make plot images and save as pdf
+      pdf(paste(pathsavefigs,"AppendFlux_", fluxhere, ".pdf", sep=""), width=7.5, height=3.5)
+      par(mfrow=c(1,2),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
+      
+      # N
+      # make the plot
+      plot(TimePt, ngN_cm3_N2O)
+      abline(lmfitN, col="darkslateblue", lwd=2)
+      # smooth quad line
+      lines(x=seq(min(TimePt), max(TimePt), len=100), y=predict(modelquadN, data.frame(TimePt=seq(min(TimePt), max(TimePt), len=100))), col="darkseagreen4", lwd=2)
+      # lines(TimePt, predict(modelquadN)) # choppy quad line
+      # add info to the plot
+      tmplab = vector('expression',3)
+      tmplab[1] = "Linear Fit"
+      tmplab[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                             list(MYVALUE = format(r2_N,dig=4)))[2]
+      tmplab[3] = paste("y = ", round(tmpslope_N,4), "x + ", round(tmpintc_N,4), sep="")  
+      legend('topleft', legend = tmplab, bty = 'n',cex=0.7)
+      tmplab2 = vector('expression',3)
+      tmplab2[1] = "Quadratic Fit"
+      tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                              list(MYVALUE = format(quadr2_N,dig=4)))[2]
+      tmplab2[3] = paste("y = ", round(quadslope_N,4), "x + ", round(quad2der_N,4), "x^2 + ", round(quadinterc_N,4), sep="")  
+      legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
+      
+      # C
+      # make the plot
+      plot(TimePt, ngC_cm3_CO2)
+      abline(lmfitC, col="darkslateblue", lwd=2)
+      # smooth quad line
+      lines(x=seq(min(TimePt), max(TimePt), len=100), y=predict(modelquadC, data.frame(TimePt=seq(min(TimePt), max(TimePt), len=100))), col="darkseagreen4", lwd=2)
+      # lines(TimePt, predict(modelquadC)) # choppy quad line
+      # add info to the plot
+      tmplab = vector('expression',3)
+      tmplab[1] = "Linear Fit"
+      tmplab[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                             list(MYVALUE = format(r2_C,dig=4)))[2]
+      tmplab[3] = paste("y = ", round(tmpslope_C,4), "x + ", round(tmpintc_C,4), sep="")  
+      legend('topleft', legend = tmplab, bty = 'n',cex=0.7)
+      tmplab2 = vector('expression',3)
+      tmplab2[1] = "Quadratic Fit"
+      tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                              list(MYVALUE = format(quadr2_C,dig=4)))[2]
+      tmplab2[3] = paste("y = ", round(quadslope_C,4), "x + ", round(quad2der_C,4), "x^2 + ", round(quadinterc_C,4), sep="")  
+      legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
+      
+      title(fluxhere, outer=TRUE)
+      dev.off()
+      
+    } else {
+      
+      print(paste("there were more than two no pressure vials for ", fluxhere, ", so we skipped it", sep=""))
+      
+    }
+        
   } else { 
     
-    print(paste("there weren't four samples for ", fluxhere, "; skipping that chamber", sep=""))
+    if(checklength == 3) {
+      
+      print(paste("there were only three samples for ", fluxhere, "; skipping that chamber", sep=""))
+      
+    } else {
+      
+      print(paste("there weren't either three or four samples for ", fluxhere, "; skipping that chamber", sep=""))
+      
+    }
     
   }
   
@@ -248,7 +273,6 @@ system2(command = "pdftk", args = c(shQuote(ff), "cat output", shQuote(outFileNa
 # POSSIBLE TO DO
 
 ###### don't forget to do all of this for CH4
-###### take out vials that had low or no pressure
 
 
 

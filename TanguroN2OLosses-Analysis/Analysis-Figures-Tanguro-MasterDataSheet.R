@@ -36,16 +36,16 @@ sitedatesummary <- dtfluxes[,list(
   Site=unique(Site), 
   color.use=unique(color.use), 
   LUname=unique(LUname),
-  meanfluxN2Ol=mean(LinearFlux[GasType=="N2O"]),
-  meanfluxCO2l=mean(LinearFlux[GasType=="CO2"]),
-  sdfluxN2Ol=sd(LinearFlux[GasType=="N2O"]),
-  sdfluxCO2l=sd(LinearFlux[GasType=="CO2"]),  
-  meanfluxN2Oq=mean(QuadFlux[GasType=="N2O"]),
-  meanfluxCO2q=mean(QuadFlux[GasType=="CO2"]),
-  sdfluxN2Oq=sd(QuadFlux[GasType=="N2O"]),
-  sdfluxCO2q=sd(QuadFlux[GasType=="CO2"]),
-  meanSoilMoisPercent=mean(SoilMoisPercent),
-  sdSoilMoisPercent=sd(SoilMoisPercent)),
+  meanfluxN2Ol=mean(na.omit(LinearFlux[GasType=="N2O"])),
+  meanfluxCO2l=mean(na.omit(LinearFlux[GasType=="CO2"])),
+  sdfluxN2Ol=sd(na.omit(LinearFlux[GasType=="N2O"])),
+  sdfluxCO2l=sd(na.omit(LinearFlux[GasType=="CO2"])),  
+  meanfluxN2Oq=mean(na.omit(QuadFlux[GasType=="N2O"])),
+  meanfluxCO2q=mean(na.omit(QuadFlux[GasType=="CO2"])),
+  sdfluxN2Oq=sd(na.omit(QuadFlux[GasType=="N2O"])),
+  sdfluxCO2q=sd(na.omit(QuadFlux[GasType=="CO2"])),
+  meanSoilMoisPercent=mean(na.omit(SoilMoisPercent)),
+  sdSoilMoisPercent=sd(na.omit(SoilMoisPercent))),
   by=easysitename] # include as many variables as desired
 
 # eventually add the soil variables and CH4 in mean and sd
@@ -179,19 +179,19 @@ dev.off()
 
 # a bunch of flux by factor scatter plots
 {
-scatter1 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + xlab("LinearFlux N2O") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + xlab("LinearFlux CO2") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter3 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + xlab("LinearFlux N2O") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter3 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter4 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + xlab("LinearFlux CO2") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter4 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 }
@@ -214,7 +214,7 @@ dev.off()
 # N2O flux pattern for each site
 {
 # ggplot
-sitetrackingN2O <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + geom_line() + theme(legend.position="none")
+sitetrackingN2O <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + geom_line() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure
@@ -224,7 +224,7 @@ ggsave(file=paste(pathsavefigures, "sitetrackingN2O.png", sep=""),width=5,height
 # CO2 flux pattern for each site
 {
 # ggplot
-sitetrackingCO2 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2") + geom_line() + theme(legend.position="none")
+sitetrackingCO2 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure
@@ -234,7 +234,7 @@ ggsave(file=paste(pathsavefigures, "sitetrackingCO2.png", sep=""),width=5,height
 # Moisture patterns for each site
 {
 # ggplot
-sitetrackingmois <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, color=color.use)) + geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Soil Moisture Percent") + geom_line() + theme(legend.position="none")
+sitetrackingmois <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, color=color.use)) + geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Soil Moisture Percent") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure

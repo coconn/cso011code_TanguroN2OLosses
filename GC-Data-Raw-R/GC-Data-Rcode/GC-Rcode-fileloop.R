@@ -24,7 +24,7 @@ filestoprocess <- standardizedfn$standardizedfilenames
 path = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-standardizedfilenames/"
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/"
-  
+
 # can use as test
 #filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
 # filestoprocess = "20140310_U" # used for testing
@@ -50,14 +50,14 @@ for (i in 1:length(filestoprocess)) {
   ## bring in data
   
   # define files for this loop
-#   myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
+  #   myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".txt", sep = "")
   myfilerunsheet <- paste(path, "runsheets-standardizedfilenames/runsheet_", filestoprocess[i], ".xlsx", sep = "")
   myfileecd <- paste(path, "ecd_", filestoprocess[i], ".txt", sep = "")
   myfilefid <- paste(path, "fid_", filestoprocess[i], ".txt", sep = "")
   myfiletcd <- paste(path, "tcd_", filestoprocess[i], ".txt", sep = "")
   
   # bring in GC data
-#   runsheet <- read.delim(myfilerunsheet)
+  #   runsheet <- read.delim(myfilerunsheet)
   runsheet <- read.xlsx(myfilerunsheet,1)
   ecdN2O <- read.delim(myfileecd, header = FALSE)
   fidCH4 <- read.delim(myfilefid, header = FALSE)
@@ -75,8 +75,9 @@ for (i in 1:length(filestoprocess)) {
   TimePt <- runsheet$TimePt
   TimePtSq <- runsheet$TimePtSq
   SampleDate <- runsheet$SampleDate
+  Pressure <- runsheet$Pressure
   
-  vialDF <- data.frame(N2Oraw, CO2raw, CH4raw, SampleName, Site, LUtype, Chamber, TimePt, TimePtSq, SampleDate)
+  vialDF <- data.frame(N2Oraw, CO2raw, CH4raw, SampleName, Site, LUtype, Chamber, TimePt, TimePtSq, SampleDate, Pressure)
   
   vialDF
   
@@ -252,6 +253,10 @@ for (i in 1:length(filestoprocess)) {
   ########################################################################
   # SUMMARY REPORT RE: THINGS TO WATCH
   
+  # number of no pressure vials
+  NoPressureCount <- length(which(Pressure=="N"))
+  
+  
   # summary for ambient vials
   
   ambNinfo <- ambientsN[1:4,1]
@@ -318,6 +323,10 @@ for (i in 1:length(filestoprocess)) {
   # save to txt file
   mywarnings <- paste(pathsavefiles, "warnings_", filestoprocess[i], ".csv", sep = "")
   
+  # are there many no pressure vials?
+  
+  cat(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n")
+  
   # are the standards curves poor quality?
   
   cat(paste("STD CURVES INFO: the Pearson's R^2 for N2O HIGH was ", round(lmN2Ohigh_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n")
@@ -340,6 +349,8 @@ for (i in 1:length(filestoprocess)) {
   #cat(HERE, file=mywarnings,sep="\n",append=TRUE)
   
   # print these statements for the viewer to see
+  
+  print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.  File = ", filestoprocess[i], sep = ""))
   print(paste("STD CURVES INFO: the Pearson's R^2 for N2O HIGH was ", round(lmN2Ohigh_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))  
   print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
@@ -372,8 +383,8 @@ for (i in 1:length(filestoprocess)) {
   vialDFfull <- rbind(vialDFfull, vialDF)
   ambinfoDFfull <- rbind(ambinfoDFfull, ambinfoDF)
   timezeroDFfull <- rbind(timezeroDFfull, timezeroDF)
-
-
+  
+  
   
 }
 
@@ -403,14 +414,16 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 # testing update: for filestoprocess = "20140310_U" this matches the venterea excel exactly!
 # thing that was keeping them different was the temperature correction.  above, the standards don't get a temperature correction, but everything else does
 
+# no or low pressure vials get removed in FluxCalc-Rcode.R
 
 
 ########################################################################
 # POSSIBLE TO DO
 
 ##### export images of the standard curves
-##### what about low or no pressure vials?  remove these data points.  or do so when scrubbing for low R2 values on flux calcs
 ##### fix warnings so they export in a more readable way
+
+###### don't forget to do all of this for CH4
 
 
 

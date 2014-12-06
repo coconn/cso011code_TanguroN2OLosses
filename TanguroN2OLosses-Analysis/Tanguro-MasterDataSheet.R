@@ -22,15 +22,6 @@ abioticfactors$SampleDate <- gsub("/14","/2014", abioticfactors$SampleDate , fix
 abioticfactors$SampleDate2 <- gsub("[.]","/",abioticfactors$SampleDate)
 abioticfactors$SampleDate2 <- as.Date(abioticfactors$SampleDate2, format="%Y/%m/%d")
 
-# add column for site-date combo name (to find site-date summary stats)
-abioticfactors$easysitename <- do.call(paste, c(abioticfactors[c("Site", "SampleDate")], sep = "_")) 
-
-# create a col to assign a color in the graphs
-abioticfactors <- transform(abioticfactors, color.use = ifelse(LUtype=="M", as.character("darkorange"), ifelse(LUtype=="F", as.character("darkgreen"), as.character("darkblue"))))
-
-# create a col to assign a better name to each land use
-abioticfactors <- transform(abioticfactors, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
-
 # new name so you never accidentally write over the original, hand-entered file
 abioticfactorsprocessed <- abioticfactors
 
@@ -60,6 +51,15 @@ fluxesfullmerge2$easysitename <- gsub("SD_","S2_", fluxesfullmerge2$easysitename
 #fluxid
 fluxesfullmerge2$FluxID <- gsub("SM_","S3_", fluxesfullmerge2$FluxID, fixed=TRUE)
 fluxesfullmerge2$FluxID <- gsub("SD_","S2_", fluxesfullmerge2$FluxID, fixed=TRUE)
+
+# add column for site-date combo name (to find site-date summary stats)
+fluxesfullmerge2$easysitename <- do.call(paste, c(fluxesfullmerge2[c("Site", "SampleDate")], sep = "_")) 
+
+# create a col to assign a color in the graphs
+fluxesfullmerge2 <- transform(fluxesfullmerge2, color.use = ifelse(LUtype=="M", as.character("darkorange"), ifelse(LUtype=="F", as.character("darkgreen"), as.character("darkblue"))))
+
+# create a col to assign a better name to each land use
+fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
 
 # save as csv
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/"

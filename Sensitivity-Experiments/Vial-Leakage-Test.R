@@ -4,97 +4,92 @@
 # CS O'Connell, UMN EEB/IonE
 
 
-
-
-
-
-
-
-
 ########################################################################
 # BRING IN DATA, MAKE DATAFRAME
 
-fluxesfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Flux-Data-Rprocessed/fluxesfull.csv", stringsAsFactors=FALSE)
-samplenum <- dim(fluxesfull)[1]/2 # sample size of chambers (div by two because each chamber has a CO2 and N2O row)
+# go to vialdffull
+vialdffull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/vialDFfull.csv", stringsAsFactors=FALSE)
+
+# subset out the leakage study vials
+leakagetestvials <- subset(vialdffull, grepl("Leak", GCrun))
+
+# save as csv
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
+write.csv(leakagetestvials, file=paste(pathsavefiles, "leakagetestvials.csv", sep = ""), row.names=FALSE)  
+
+
+
+#### these results are messed up.  is it possible that these are crazy because the standards that were drawn that day aren't the ones that GC-Rcode-fileloop.R is pointing to?
+####### yes - that's what was happening.  fixed now by changing the vial names so only the ones filled the day of the run are called Mix1, etc.
+
+
+########################################################################
+# Organize data, create leakagetestsummary
+
+# in the final thing that feed into ggplot:
+# mean and sd, se as columns; mix1leak, mix2leak as the rows
+# use ddply
+
+require(plyr)
+
+se <- function(x) sd(x,na.rm=TRUE)/sqrt(length(na.omit(x)))
+
+# ddply for summarizing/subsetting
+leakagetestsummary <- ddply(leakagetestvials, .(GCrun, SampleName), summarize,
+      mean = mean(ngN_cm3_N2O),
+      sd = sd(ngN_cm3_N2O),
+      se = se(ngN_cm3_N2O),
+      n = length(ngN_cm3_N2O),
+      SampleDate = unique(SampleDate))
+
+# add column that meakes it easier to label figures
+leakagetestsummary <- transform(leakagetestsummary, 
+                                LeakageTime = ifelse(GCrun=="20140606_Leak0", as.character("Leakage Test Week 0"), 
+                                                     ifelse(GCrun=="20140613_Leak1", as.character("Leakage Test Week 1"), 
+                                                            ifelse(GCrun=="20140701_Leak4", as.character("Leakage Test Week 4"), 
+                                                                   ifelse(GCrun=="20140806_Leak8", as.character("Leakage Test Week 8"), 
+                                                                          as.character("Leakage Test Week 12"))))))
+
+# time since day leakage test vials were filled (2014.06.05) 
+# date started leakage experiment
+leakagetestsummary <- transform(leakagetestsummary, 
+                                daterun = ifelse(GCrun=="20140606_Leak0", as.character("2014.06.06"), 
+                                                     ifelse(GCrun=="20140613_Leak1", as.character("2014.06.13"), 
+                                                            ifelse(GCrun=="20140701_Leak4", as.character("2014.07.02"), 
+                                                                   ifelse(GCrun=="20140806_Leak8", as.character("2014.08.06"), 
+                                                                          as.character("2014.09.05"))))))
+leakagetestsummary$daterun <- gsub("[.]","/",leakagetestsummary$daterun)
+leakagetestsummary$daterun <- as.Date(leakagetestsummary$daterun, format="%Y/%m/%d")
+# reformat date of GC run
+leakagetestsummary$SampleDate <- gsub("[.]","/",leakagetestsummary$SampleDate)
+leakagetestsummary$SampleDate <- as.Date(leakagetestsummary$SampleDate, format="%Y/%m/%d")
+# days since start
+leakagetestsummary$datediff <- leakagetestsummary$daterun - leakagetestsummary$SampleDate
+
+# capped by hand or capped with auto crimper?
+AUrows <- grepl("^AU", leakagetestsummary$SampleName)
+leakagetestsummary <- transform(leakagetestsummary, crimpstyle = ifelse(AUrows==TRUE, as.character("auto"), as.character("hand")))
+
+# save as csv
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
+write.csv(leakagetestsummary, file=paste(pathsavefiles, "leakagetestsummary.csv", sep = ""), row.names=FALSE)  
 
 
 
 ########################################################################
-# DATA QUALITY: R^2 INFO
-
-LinearR2_N2O <- fluxesfull$LinearR2[(fluxesfull$GasType)=="N2O"]
-QuadR2_N2O <- fluxesfull$QuadR2[(fluxesfull$GasType)=="N2O"]
-
-LinearR2_CO2 <- fluxesfull$LinearR2[(fluxesfull$GasType)=="CO2"]
-QuadR2_CO2 <- fluxesfull$QuadR2[(fluxesfull$GasType)=="CO2"]
+# Bar graphs looking at each time point (Leak0 - Leak12)
 
 
-## histograms of CO2 and N2O R^2 values
 
-# where to save figure
-pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Fluxes-DataQuality/"
 
-# make plot and save
-png(file = paste(pathsavefigures, "R2-fluxes-histograms.png", sep=""),width=6,height=6,units="in",res=400)
 
-# make plot
-par(mfrow=c(2,2),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
-hist(LinearR2_N2O, main="")
-hist(QuadR2_N2O, main="")
-hist(LinearR2_CO2, main="")
-hist(QuadR2_CO2, main="")
-title(substitute(paste(R^2, " Histograms, Sample Size = ", samplenum, " chambers"), list(samplenum = samplenum)), outer=TRUE)
-
-dev.off()
 
 
 
 ########################################################################
-# DATA QUALITY: CO2 and N2O CORRELATION
+# Line graph over days vials were sitting (Day 0 to Day 92)
 
-## correlation between the CO2 and N2O R^2 values
-# correlation info
-cor1t <- cor.test(LinearR2_CO2,LinearR2_N2O)
-cor2t <- cor.test(QuadR2_CO2,QuadR2_N2O)
-cor_stars <- numeric(length=2)
-# cycle through to set number of stars
-for (i in 1:2 ) {
-  
-  corpval <- paste("cor",i,"t$p.value",sep="")
-  
-  if(eval(parse(text=corpval)) < 0.001){
-    cor_stars[i] <- "***"
-  } else if(eval(parse(text=corpval)) < 0.01){
-    cor_stars[i] <- "**"
-  } else if(eval(parse(text=corpval)) < 0.05){
-    cor_stars[i] <- "*"
-  } else {
-    cor_stars[i] <- " "
-  }
-  
-}
-# to make abline
-r2linearlm <- lm(LinearR2_N2O ~ LinearR2_CO2)
-r2quadlm <- lm(QuadR2_N2O ~ QuadR2_CO2)
 
-# where to save figure
-pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Fluxes-DataQuality/"
-
-# make plot and save
-png(file = paste(pathsavefigures, "n2o-co2-correlation.png", sep=""),width=6,height=4,units="in",res=400)
-
-# make plot
-par(mfrow=c(1,2),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
-#plot1
-plot(LinearR2_CO2,LinearR2_N2O)
-abline(r2linearlm)
-legend('topleft', legend = paste("ρ =", round(cor1t$estimate,4), cor_stars[1]), bty = 'n')
-#plot2
-plot(QuadR2_CO2,QuadR2_N2O)
-abline(r2quadlm)
-legend('topleft', legend = paste("ρ =", round(cor2t$estimate,4), cor_stars[2]), bty = 'n')
-
-dev.off()
 
 
 
