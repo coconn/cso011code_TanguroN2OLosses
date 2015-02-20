@@ -220,22 +220,20 @@ for (i in 1:length(fluxcalclist)) {
       print(paste("there were more than two no pressure vials for ", fluxhere, ", so we skipped it", sep=""))
       
     }
-        
-  } else { 
     
-    if(checklength == 3) {
-      
-      print(paste("there were only three samples for ", fluxhere, "; skipping that chamber", sep=""))
-      
-    } else {
-      
-      print(paste("there weren't either three or four samples for ", fluxhere, "; skipping that chamber", sep=""))
-      
-    }
+  } else if(checklength == 3) { 
+    
+    print(paste("there were only three samples for ", fluxhere, "; skipping that chamber", sep=""))
+    
+  } else {
+    
+    print(paste("there weren't either three or four samples for ", fluxhere, "; skipping that chamber", sep=""))
     
   }
   
 }
+
+
 
 
 ## save outputdffull as csv file

@@ -148,7 +148,8 @@ for (i in 1:length(filestoprocess)) {
   # ppm values in the standards
   ppmNstds <- c(0.301,1.57,3) # Mix1, Mix2, 3N2O
   ppmCstds <- c(600,1000,3000) # Mix1, Mix2, 3KCO2
-  
+  ppmCHstds <- c(1,1.7,0) # Mix1, Mix2, (0,0) - see email "two quick questions: CH4 in standards? and using 10N2O"
+    
   # regression dataframes
   
   areaN2Ostds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3N2O', select=c(N2Oc))
@@ -160,6 +161,12 @@ for (i in 1:length(filestoprocess)) {
   stdtabCO2
   # get rid of mix2 (don't trust it for CO2), use (0,0) instead
   stdtabCO2[2,1:2]<-0
+  
+  areaCH4stds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3KCO2', select=c(CH4c)) # third entry is a dummy right now
+  stdtabCH4 = data.frame(area=areaCH4stds,ppm=ppmCHstds)
+  stdtabCH4
+  # make (0,0) one of the points
+  stdtabCH4[3,1:2]<-0
   
   
   # build standards curves
@@ -200,6 +207,24 @@ for (i in 1:length(filestoprocess)) {
   lmCO2low_cor <- cor(stdtabCO2$CO2c[1:2], stdtabCO2$ppm[1:2])
   lmCO2low_pearsonsR2 <- lmCO2low_cor^2
   
+  # high level CH4 calibration
+  lmCH4high <- lm(stdtabCH4$ppm ~ stdtabCH4$CH4c)
+  lmCH4high_intercept <- coef(summary(lmCH4high))["(Intercept)","Estimate"]
+  lmCH4high_slope <- coef(summary(lmCH4high))["stdtabCH4$CH4c","Estimate"]
+  # square of correlation is pearson's R^2
+  # http://en.wikipedia.org/wiki/Coefficient_of_determination
+  lmCH4high_cor <- cor(stdtabCH4$CH4c, stdtabCH4$ppm)
+  lmCH4high_pearsonsR2 <- lmCH4high_cor^2
+  
+  # low level CH4 calibration
+  lmCH4low <- lm(stdtabCH4$ppm[1:2] ~ stdtabCH4$CH4c[1:2])
+  lmCH4low_intercept <- coef(summary(lmCH4low))["(Intercept)","Estimate"]
+  lmCH4low_slope <- coef(summary(lmCH4low))["stdtabCH4$CH4c[1:2]","Estimate"]
+  # square of correlation is pearson's R^2
+  # http://en.wikipedia.org/wiki/Coefficient_of_determination
+  lmCH4low_cor <- cor(stdtabCH4$CH4c[1:2], stdtabCH4$ppm[1:2])
+  lmCH4low_pearsonsR2 <- lmCH4low_cor^2
+  
   
   
   # get ppm correction columns, save to dataframe
@@ -207,17 +232,17 @@ for (i in 1:length(filestoprocess)) {
   # ifelse test (determine whether to use high or low standards curve)
   N2Oppm <- ifelse(N2Oc>stdtabN2O$N2Oc[2], N2Oc*lmN2Ohigh_slope+lmN2Ohigh_intercept, N2Oc*lmN2Olow_slope+lmN2Olow_intercept)
   CO2ppm <- ifelse(CO2c>stdtabCO2$CO2c[1], CO2c*lmCO2high_slope+lmCO2high_intercept, CO2c*lmCO2low_slope+lmCO2low_intercept)
+  CH4ppm <- ifelse(CH4c>stdtabCH4$CH4c[1], CH4c*lmCH4high_slope+lmCH4high_intercept, CH4c*lmCH4low_slope+lmCH4low_intercept)
   
   vialDF$N2Oppm <- N2Oppm
   vialDF$CO2ppm <- CO2ppm
-  # vialDF$CH4c <- CH4c # don't forget to do CH4 here once you have the standards info
+  vialDF$CH4ppm <- CH4ppm
   
   
   
   
   ###### Q: how come we don't use 10N2O in the standards curves?
-  ###### Q: what are the CH4 values for Mix1 and Mix2 (and the other standards, if applicable)?
-  ###### Q: don't forget to do the ppm and ng/cm3 corrections for methane (currently there are placeholders)
+  ###### A: see email "two quick questions: CH4 in standards? and using 10N2O" - "Bottom line, do NOT include the 10 PPM std unless you actually had a significant number of samples showing up with Area Counts greater than the 3 PPM standard. This is very rare, and means you had very high fluxes. The N2O calibration becomes non-linear above 3PPM so this complicates things further. So you might want to let me know what you find out. -Rod"
   
   
   
@@ -228,24 +253,30 @@ for (i in 1:length(filestoprocess)) {
   # tmp-volume-land use dataframe
   ngN_cm3_correction <- c(341.2262)
   ngC_cm3_correction <- c(0.1462398)
+  ngCH_cm3_correction <- c(0.15) ##### What is the right number here?????  FIX THIS
   
   LU <- c("F","M","S")
   degC <- c(20,20,20)
   voltmpcorrN2O <- ngN_cm3_correction/(degC+273.15)
   voltmpcorrCO2 <- ngC_cm3_correction/(degC+273.15)
+  voltmpcorrCH4 <- ngCH_cm3_correction/(degC+273.15)
   
-  voltmptab = data.frame(LU,degC,voltmpcorrN2O,voltmpcorrCO2)
+  voltmptab = data.frame(LU,degC,voltmpcorrN2O,voltmpcorrCO2,voltmpcorrCH4)
   
   # solve for ngN_cm3 and ngC_cm3 and save to df
   ngN_cm3_N2O <- N2Oppm*voltmptab[1,3]
   ##### here is where I should have screened for land use - instead, I just used the 20 degC option for all land uses.
   ngC_cm3_CO2 <- CO2ppm*voltmptab[1,4]
+  ngC_cm3_CH4 <- CH4ppm*voltmptab[1,5]
+  
   vialDF$ngN_cm3_N2O <- ngN_cm3_N2O
   vialDF$ngC_cm3_CO2 <- ngC_cm3_CO2
+  vialDF$ngC_cm3_CH4 <- ngC_cm3_CH4
   
   
   ###### Q: adjust tmp by land use (see line 191)
-  ###### Q: don't forget to go back and do CH4 for this step as well
+  
+  ###### Q: what is the right number for line 256????? (ngCH_cm3_correction)
   
   
   
@@ -269,10 +300,15 @@ for (i in 1:length(filestoprocess)) {
   ambCinfo[6] <- ambientsCsd
   ambCinfo[7] <- ambientsCcount
   ambCinfo[8] <- ambientsCsd/ambientsCmean
+  ambCHinfo <- ambientsCH[1:4,1]
+  ambCHinfo[5] <- ambientsCHmean
+  ambCHinfo[6] <- ambientsCHsd
+  ambCHinfo[7] <- ambientsCHcount
+  ambCHinfo[8] <- ambientsCHsd/ambientsCHmean
   
   Labels <- c("Amb1","Amb2","Amb3","Amb4","Mean", "Std", "Count", "CV")
   
-  ambinfoDF <- data.frame(Labels,ambNinfo,ambCinfo)
+  ambinfoDF <- data.frame(Labels,ambNinfo,ambCinfo,ambCHinfo)
   ambinfoDF$GCrun <- runsheet$GCRun[1:8]
   
   
@@ -281,6 +317,7 @@ for (i in 1:length(filestoprocess)) {
   
   timezeroN <- subset(vialDF, vialDF$TimePt==0, select=c(N2Oppm))
   timezeroC <- subset(vialDF, vialDF$TimePt==0, select=c(CO2ppm))
+  timezeroCH <- subset(vialDF, vialDF$TimePt==0, select=c(CH4ppm))
   timezeroLabels <- subset(vialDF, vialDF$TimePt==0, select=c(SampleName))
   
   timezeroNmean <- mean(timezeroN$N2Oppm)
@@ -297,21 +334,30 @@ for (i in 1:length(filestoprocess)) {
   timezeroCupperlimit <- timezeroCmean+timezeroCsdallow*timezeroCsd
   timezeroClowerlimit <- timezeroCmean-timezeroCsdallow*timezeroCsd
   
+  timezeroCHmean <- mean(timezeroCH$CH4ppm)
+  timezeroCHsd <- sd(timezeroCH$CH4ppm)
+  timezeroCHCV <- timezeroCHsd/timezeroCHmean
+  timezeroCHsdallow <- 2
+  timezeroCHupperlimit <- timezeroCHmean+timezeroCHsdallow*timezeroCHsd
+  timezeroCHlowerlimit <- timezeroCHmean-timezeroCHsdallow*timezeroCHsd
+  
   # add on summary info at the end
   tmplength <- dim(timezeroN)[1]
   
   timezeroNinfo <- timezeroN[1:tmplength,1]
   timezeroCinfo <- timezeroC[1:tmplength,1]
+  timezeroCHinfo <- timezeroCH[1:tmplength,1]
   
   timezeroNinfo[(tmplength+1):(tmplength+6)] <- c(timezeroNmean,timezeroNsd,timezeroNCV,timezeroNsdallow,timezeroNupperlimit,timezeroNlowerlimit)
   timezeroCinfo[(tmplength+1):(tmplength+6)] <- c(timezeroCmean,timezeroCsd,timezeroCCV,timezeroCsdallow,timezeroCupperlimit,timezeroClowerlimit)
+  timezeroCHinfo[(tmplength+1):(tmplength+6)] <- c(timezeroCHmean,timezeroCHsd,timezeroCHCV,timezeroCHsdallow,timezeroCHupperlimit,timezeroCHlowerlimit)
   
   timezeroLabs <- as.data.frame(as.matrix(timezeroLabels),stringsAsFactors=F)
   timezeroLabs <- timezeroLabs$SampleName
   
   timezeroLabs[(tmplength+1):(tmplength+6)]<-c("time zero mean", "time zero sd", "time zero CV", "time zero sd allow" ,"time zero upper limit", "time zero lower limit")
   
-  timezeroDF <- data.frame(timezeroLabs,timezeroNinfo,timezeroCinfo)
+  timezeroDF <- data.frame(timezeroLabs,timezeroNinfo,timezeroCinfo,timezeroCHinfo)
   timezeroDF$GCrun <- runsheet$GCRun[1:(tmplength+6)]
   
   
@@ -333,12 +379,15 @@ for (i in 1:length(filestoprocess)) {
   cat(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   cat(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   cat(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for CH4 HIGH was ", round(lmCH4high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("STD CURVES INFO: the Pearson's R^2 for CH4 LOW was ", round(lmCH4low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   
   # is there high variability in the ambient vials?
   
   indAMB = which(ambinfoDF$Labels=="CV")
   cat(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   cat(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("AMBIENT VIAL INFO: the CV for CH4 was ", round(ambinfoDF$ambCHinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   
   # is there high variability in the time zero vials?
   
@@ -346,6 +395,7 @@ for (i in 1:length(filestoprocess)) {
   
   cat(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   cat(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
+  cat(paste("TIME ZERO INFO: the CV for CH4 was ", round(timezeroDF$timezeroCHinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""), file=mywarnings,sep="\n",append=TRUE)
   #cat(HERE, file=mywarnings,sep="\n",append=TRUE)
   
   # print these statements for the viewer to see
@@ -355,10 +405,14 @@ for (i in 1:length(filestoprocess)) {
   print(paste("STD CURVES INFO: the Pearson's R^2 for N2O LOW was ", round(lmN2Olow_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))  
   print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 HIGH was ", round(lmCO2high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("STD CURVES INFO: the Pearson's R^2 for CO2 LOW was ", round(lmCO2low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("STD CURVES INFO: the Pearson's R^2 for CH4 HIGH was ", round(lmCH4high_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("STD CURVES INFO: the Pearson's R^2 for CH4 LOW was ", round(lmCH4low_pearsonsR2, digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("AMBIENT VIAL INFO: the CV for N2O was ", round(ambinfoDF$ambNinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("AMBIENT VIAL INFO: the CV for CO2 was ", round(ambinfoDF$ambCinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("AMBIENT VIAL INFO: the CV for CH4 was ", round(ambinfoDF$ambCHinfo[indAMB], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("TIME ZERO INFO: the CV for N2O was ", round(timezeroDF$timezeroNinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   print(paste("TIME ZERO INFO: the CV for CO2 was ", round(timezeroDF$timezeroCinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""))
+  print(paste("TIME ZERO INFO: the CV for CH4 was ", round(timezeroDF$timezeroCHinfo[indTZ], digits=4), ".  File = ", filestoprocess[i], sep = ""))
   
   
   # readline(prompt = "ready to move on?  press return.  ")
@@ -423,7 +477,6 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 ##### export images of the standard curves
 ##### fix warnings so they export in a more readable way
 
-###### don't forget to do all of this for CH4
 
 
 
