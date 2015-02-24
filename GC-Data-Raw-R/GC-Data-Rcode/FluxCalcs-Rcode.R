@@ -63,9 +63,10 @@ for (i in 1:length(fluxcalclist)) {
     
     # if there are four samples for that chamber available, do calcs
     
-    # for that flux calc id, get ngN_cm3_N2O, ngC_cm3_CO2, TimePt, TimePtSq
+    # for that flux calc id, get ngN_cm3_N2O, ngC_cm3_CO2, ngC_cm3_CH4, TimePt, TimePtSq
     ngN_cm3_N2O <- vialDFfull$ngN_cm3_N2O[(vialDFfull$easycallname)==fluxhere]
     ngC_cm3_CO2 <- vialDFfull$ngC_cm3_CO2[(vialDFfull$easycallname)==fluxhere]
+    ngC_cm3_CH4 <- vialDFfull$ngC_cm3_CH4[(vialDFfull$easycallname)==fluxhere]
     TimePt <- vialDFfull$TimePt[(vialDFfull$easycallname)==fluxhere]
     TimePtSq <- vialDFfull$TimePtSq[(vialDFfull$easycallname)==fluxhere]
     # informational stuff to log
@@ -80,6 +81,7 @@ for (i in 1:length(fluxcalclist)) {
     nopressureid <- which(nopressure=="N")
     ngN_cm3_N2O[nopressureid] <- NA
     ngC_cm3_CO2[nopressureid] <- NA
+    ngC_cm3_CH4[nopressureid] <- NA
     
     # if there is more than 1 no pressure vial in this flux, skip all the rest
     checkpressurelength <- sum(!is.na(ngN_cm3_N2O))
@@ -98,7 +100,7 @@ for (i in 1:length(fluxcalclist)) {
       # mass per area^2 per time
       lmfluxN <- chambervol * tmpslope_N/chamberarea * 60
       
-      # C
+      # CO2
       lmfitC <- lm(ngC_cm3_CO2 ~ TimePt)
       r2_C <- summary(lmfitC)$r.squared
       tmpslope_C <- summary(lmfitC)$coefficients[2,1]
@@ -106,6 +108,15 @@ for (i in 1:length(fluxcalclist)) {
       # linear flux
       # mass per area^2 per time
       lmfluxC <- chambervol * tmpslope_C/chamberarea * 60
+      
+      # CH4
+      lmfitCH <- lm(ngC_cm3_CH4 ~ TimePt)
+      r2_CH <- summary(lmfitCH)$r.squared
+      tmpslope_CH <- summary(lmfitCH)$coefficients[2,1]
+      tmpintc_CH <- summary(lmfitCH)$coefficients[1,1]
+      # linear flux
+      # mass per area^2 per time
+      lmfluxCH <- chambervol * tmpslope_CH/chamberarea * 60
       
       ###### make sure that you understand the flux calcs 
       ###### (what is the unit that we're trying to cancel out by multiplying by chamber volume?)
@@ -133,6 +144,15 @@ for (i in 1:length(fluxcalclist)) {
       # mass per area^2 per time
       quadfluxC <- chambervol * quadslope_C/chamberarea * 60
       
+      # CH
+      modelquadCH <- lm(ngC_cm3_CH4 ~ poly(TimePt, 2, raw=TRUE))
+      quadr2_CH <- summary(modelquadCH)$r.squared
+      quadslope_CH <- summary(modelquadCH)$coefficients[2,1]
+      quad2der_CH <- summary(modelquadCH)$coefficients[3,1]
+      quadinterc_CH <- summary(modelquadCH)$coefficients[1,1]
+      # quadratic flux
+      # mass per area^2 per time
+      quadfluxCH <- chambervol * quadslope_CH/chamberarea * 60
       
       ## put info into running output file
       
@@ -164,11 +184,25 @@ for (i in 1:length(fluxcalclist)) {
       outputdf$FluxID <- fluxhere
       # bind onto output table
       outputdffull <- rbind(outputdffull, outputdf)
+      # put into a df (CH4)
+      outputdf <- data.frame(Site,LUtype,Chamber,SampleDate)
+      outputdf$GasType <- c("CH4")
+      outputdf$LinearR2 <- r2_CH
+      outputdf$LinearSlope <- tmpslope_CH
+      outputdf$LinearInt <- tmpintc_CH
+      outputdf$LinearFlux <- lmfluxCH
+      outputdf$QuadR2 <- quadr2_CH
+      outputdf$QuadSlope <- quadslope_CH
+      outputdf$Quad2der <- quad2der_CH
+      outputdf$QuadFlux <- quadfluxCH
+      outputdf$FluxID <- fluxhere
+      # bind onto output table
+      outputdffull <- rbind(outputdffull, outputdf)
       
       
       ## make plot images and save as pdf
-      pdf(paste(pathsavefigs,"AppendFlux_", fluxhere, ".pdf", sep=""), width=7.5, height=3.5)
-      par(mfrow=c(1,2),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
+      pdf(paste(pathsavefigs,"AppendFlux_", fluxhere, ".pdf", sep=""), width=11, height=3.5)
+      par(mfrow=c(1,3),oma=c(0,0,2,0),mar = c(5.1, 4.1, 2.1, 2.1))
       
       # N
       # make the plot
@@ -210,6 +244,27 @@ for (i in 1:length(fluxcalclist)) {
       tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
                               list(MYVALUE = format(quadr2_C,dig=4)))[2]
       tmplab2[3] = paste("y = ", round(quadslope_C,4), "x + ", round(quad2der_C,4), "x^2 + ", round(quadinterc_C,4), sep="")  
+      legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
+      
+      # CH
+      # make the plot
+      plot(TimePt, ngC_cm3_CH4)
+      abline(lmfitCH, col="darkslateblue", lwd=2)
+      # smooth quad line
+      lines(x=seq(min(TimePt), max(TimePt), len=100), y=predict(modelquadCH, data.frame(TimePt=seq(min(TimePt), max(TimePt), len=100))), col="darkseagreen4", lwd=2)
+      # lines(TimePt, predict(modelquadCH)) # choppy quad line
+      # add info to the plot
+      tmplab = vector('expression',3)
+      tmplab[1] = "Linear Fit"
+      tmplab[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                             list(MYVALUE = format(r2_CH,dig=4)))[2]
+      tmplab[3] = paste("y = ", round(tmpslope_CH,4), "x + ", round(tmpintc_CH,4), sep="")  
+      legend('topleft', legend = tmplab, bty = 'n',cex=0.7)
+      tmplab2 = vector('expression',3)
+      tmplab2[1] = "Quadratic Fit"
+      tmplab2[2] = substitute(expression(italic(R)^2 == MYVALUE), 
+                              list(MYVALUE = format(quadr2_CH,dig=4)))[2]
+      tmplab2[3] = paste("y = ", round(quadslope_CH,4), "x + ", round(quad2der_CH,4), "x^2 + ", round(quadinterc_CH,4), sep="")  
       legend('bottomright', legend = tmplab2, bty = 'n',cex=0.7)
       
       title(fluxhere, outer=TRUE)
@@ -264,13 +319,7 @@ system2(command = "pdftk", args = c(shQuote(ff), "cat output", shQuote(outFileNa
 # ran this all the way through for "SM_A_2014.02.20" and works!
 # some fluxes are slightly off (for instance, fluxhere <- "SM_A_2014.02.14") because in the excel it was temperature corrected to 25degC and in this code I temperature corrected everything to 20degC
 
-
-
-
-########################################################################
-# POSSIBLE TO DO
-
-###### don't forget to do all of this for CH4
+# done for CH4 on 24-Feb-2015
 
 
 
