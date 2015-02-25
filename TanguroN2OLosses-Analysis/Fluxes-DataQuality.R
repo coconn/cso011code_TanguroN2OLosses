@@ -9,7 +9,7 @@
 # BRING IN DATA, MAKE DATAFRAME
 
 fluxesfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Flux-Data-Rprocessed/fluxesfull.csv", stringsAsFactors=FALSE)
-samplenum <- dim(fluxesfull)[1]/2 # sample size of chambers (div by two because each chamber has a CO2 and N2O row)
+samplenum <- dim(fluxesfull)[1]/3 # sample size of chambers (div by 3 because each chamber has a CO2, CH4 and N2O row)
 
 
 
