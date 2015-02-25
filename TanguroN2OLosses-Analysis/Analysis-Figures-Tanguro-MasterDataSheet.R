@@ -38,17 +38,21 @@ sitedatesummary <- dtfluxes[,list(
   LUname=unique(LUname),
   meanfluxN2Ol=mean(na.omit(LinearFlux[GasType=="N2O"])),
   meanfluxCO2l=mean(na.omit(LinearFlux[GasType=="CO2"])),
+  meanfluxCH4l=mean(na.omit(LinearFlux[GasType=="CH4"])),
   sdfluxN2Ol=sd(na.omit(LinearFlux[GasType=="N2O"])),
   sdfluxCO2l=sd(na.omit(LinearFlux[GasType=="CO2"])),  
+  sdfluxCH4l=sd(na.omit(LinearFlux[GasType=="CH4"])),  
   meanfluxN2Oq=mean(na.omit(QuadFlux[GasType=="N2O"])),
   meanfluxCO2q=mean(na.omit(QuadFlux[GasType=="CO2"])),
+  meanfluxCH4q=mean(na.omit(QuadFlux[GasType=="CH4"])),
   sdfluxN2Oq=sd(na.omit(QuadFlux[GasType=="N2O"])),
   sdfluxCO2q=sd(na.omit(QuadFlux[GasType=="CO2"])),
+  sdfluxCH4q=sd(na.omit(QuadFlux[GasType=="CH4"])),
   meanSoilMoisPercent=mean(na.omit(SoilMoisPercent)),
   sdSoilMoisPercent=sd(na.omit(SoilMoisPercent))),
   by=easysitename] # include as many variables as desired
 
-# eventually add the soil variables and CH4 in mean and sd
+# eventually add the soil variables
 # move this code to tanguro-masterdatasheet.r and save as csv?
 # include N, standard error and CI as per http://www.cookbook-r.com/Manipulating_data/Summarizing_data/
 
@@ -73,14 +77,19 @@ no2linloess <- no2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") 
 # CO2 Linear
 co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2")
 co2linloess <- co2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+
+# CH4 Linear
+ch4lin <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CH4")
+ch4linloess <- ch4lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+
 }
 
 # where to save figure
 {
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # grid.arrange and save
-png(file = paste(pathsavefigures, "fluxes-factors-by-time-Nchambers.png", sep=""),width=10,height=14,units="in",res=400)
-grid.arrange(soiltmploess, soilmoisloess, no2linloess, co2linloess, nrow = 4, ncol = 1)
+png(file = paste(pathsavefigures, "fluxes-factors-by-time-Nchambers.png", sep=""),width=10,height=18,units="in",res=400)
+grid.arrange(soiltmploess, soilmoisloess, no2linloess, co2linloess, ch4linloess, nrow = 5, ncol = 1)
 dev.off()
 }
 
@@ -161,6 +170,18 @@ co2linfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, colour
   geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # loess smooth included on facets
 co2linfacetloess <- co2linfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+
+# ch4 fluxes
+# no faceting
+ch4lin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, colour=color.use)) + 
+      geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) +
+      geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux CH4") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+# faceting
+ch4linfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, colour=color.use)) + 
+      geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) +
+      geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CH4") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+# loess smooth included on facets
+ch4linfacetloess <- ch4linfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 }
 
 
@@ -169,7 +190,7 @@ co2linfacetloess <- co2linfacet + geom_smooth(size = 1.5, fill="#333333", colour
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # grid.arrange and save
 png(file = paste(pathsavefigures, "fluxes-factors-by-time-sitedate-facet-noloess.png", sep=""),width=10,height=14,units="in",res=400)
-grid.arrange(soilmoisfacet, n2olinfacet, co2linfacet, nrow = 3, ncol = 1)
+grid.arrange(soilmoisfacet, n2olinfacet, co2linfacet, ch4linfacet, nrow = 4, ncol = 1)
 dev.off()
 }
 
@@ -179,29 +200,37 @@ dev.off()
 
 # a bunch of flux by factor scatter plots
 {
-scatter1 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter3 <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CH4") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines                                                                                                                                                                                                                                         
+      se=TRUE,    # Do or don't add shaded confidence region                                                                                
+      fullrange=T) # Extend regression lines beyond the domain of the data
+
+scatter2a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter4 <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
+
+scatter2c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CH4") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+            se=TRUE,    # Do or don't add shaded confidence region
+            fullrange=T) # Extend regression lines beyond the domain of the data
 }
 
 # where to save figure
 {
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # grid.arrange and save
-png(file = paste(pathsavefigures, "flux-factors-scatterplots.png", sep=""),width=10,height=10,units="in",res=400)
-grid.arrange(scatter1, scatter2, scatter3, scatter4, nrow = 2, ncol = 2)
+png(file = paste(pathsavefigures, "flux-factors-scatterplots.png", sep=""),width=15,height=10,units="in",res=400)
+grid.arrange(scatter1a, scatter1b, scatter1c, scatter2a, scatter2b, scatter2c, nrow = 2, ncol = 3)
 dev.off()
 }
 
