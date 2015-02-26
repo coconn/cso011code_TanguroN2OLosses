@@ -1,0 +1,51 @@
+email subject line: Greenhouse gas results from Tanguro experiment
+from: Ado Cerri (cepcerri@usp.br)
+
+included these data sheets:
+GasSamplesSummary_19022015.xls
+runsheet_20141201_JankowskiA_19022015.xlsx
+runsheet_20141201_JankowskiB_19022015.xlsx
+
+Dear Marcia, Chris, Gillian, Ciniro and Christine
+I hope everything is fine with you and families.
+Please find attached 3 files containing the GHG results from about 660 samples you recently brought to Piracicaba.
+
+1) File called "runsheet_20141201_JankowskiA_19022015" (32 samples analyzed)
+2) File called "runsheet_20141201_JankowskiB_19022015" (32 samples analyzed)
+3) File called "GasSamplesSummary_19022015" (418+98+80 samples analyzed). 
+Please note that within this file you will find 3 sheets: Sheet 1 called "Boxes" brings the results of 418 samples analyzed, except those from Box 3 and Box 5. Then you will find sheets called "Box 3" (total of 98 samples analyzed) and "Box 5" (total of 80 samples analyzed). We added these two sheets because the description does not directly match the original codes in the general sheet.
+
+Please let me know if you need more details and/or clarifications.
+
+Next week I will send you the remaining results (i.e., about 330 samples to be analyzed)
+Obrigado
+Abracos
+ado
+
+
+##################################################################
+##################################################################
+
+
+email subject line: More results on Greenhouse gas results from Tanguro experiment
+from: Ado Cerri (cepcerri@usp.br)
+
+included these data sheets:
+Results GHG Tanguro_samples T48 A-C_20022015.xlsx
+runsheet_20141201_JankowskiA_20022015.xlsx
+
+
+Dear Marcia
+I hope you and family are fine!
+Please find attached new GHG results from Tanguro.
+
+The file called "runsheet_20141201_JankowskiA_20022015" is the final file related to those samples you brought here, including the "travel standards" and "CENA standards" vials.
+The file called "Results GHG Tanguro_samples T48 A-C_20022015" was created since we did not have any prepared excell sheet. We used the same codes we found in the vial lables. Please let me know if you want us to change that.
+
+Please let me know if you need any other clarification.
+
+We are still analyzing the last 3 boxes. I hope to send you the last results soon! 
+
+Obrigado
+Abracos
+Ado
