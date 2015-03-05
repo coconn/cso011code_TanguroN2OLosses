@@ -74,3 +74,38 @@ Ado
 
 
 
+##################################################################
+##################################################################
+
+
+email subject line: All 1,050 GHG samples analyzed
+from: Ado Cerri (cepcerri@usp.br)
+
+included these data sheets:
+Results GHG_poços.xlsx
+Results GHG_Soja and CH.xlsx
+
+
+
+to Marcia, Christopher, Gillian, Ciniro, Christine, KathiJo 
+Dear Marcia and other colleagues
+Please find attached the last 2 files with GHG results from the first set of samples you brought here in Piracicaba.
+Now all the 1,050 GHG samples were analyzed. The first set of samples is done!
+
+Just for your records, please find below the number of samples analyzed in each file I sent you:
+
+File name: GasSampleSummary_27022015 (562+98+80 samples) 
+File name: Runsheet_20141201_JankowskiA_20022015 (105 samples)
+File name: Runsheet_20141201_JankowskiB_20022015 (32 samples)
+File name: Results GHG Tanguro_T48 A-C_20022015 (20 samples)
+File name: Results GHG_Poços (66 samples)
+File name: Results GHG_Soja and CH (87 samples)
+
+Well, now we will start analyzing the second set of samples I got yestarday.
+Obrigado
+Abracos
+Ado
+
+
+
+
