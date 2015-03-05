@@ -1,6 +1,4 @@
 ---
-title: "cso011code_TanguroN2OLosses Info"
-author: "Christine"
 output: html_document
 ---
 
@@ -15,10 +13,4 @@ This is a repo where I keep the raw data and the analytical codes for my trace g
 
 
 * automate building resultscombotable.txt (which Christine previously built by hand after 
-
-
-cso011code_TanguroN2OLosses
-===========================
-
-first project!
 
