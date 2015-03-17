@@ -61,6 +61,20 @@ fluxesfullmerge2 <- transform(fluxesfullmerge2, color.use = ifelse(LUtype=="M", 
 # create a col to assign a better name to each land use
 fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
 
+
+
+########################################################################
+# APPEND THE LEAKAGE CORRECTION ANALYSES
+
+
+
+
+
+
+
+########################################################################
+# SAVE Tanguro-MasterDataSheet.csv
+
 # save as csv
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/"
 write.csv(fluxesfullmerge2, file=paste(pathsavefiles, "Tanguro-MasterDataSheet.csv", sep = ""), row.names=FALSE)  
