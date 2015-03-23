@@ -1,5 +1,8 @@
-# Vial-Leakage-Test.R
+# Vial-Leakage-Test-Exploratory.R
 # testing how much the vials leak over time, based on leakage test experiment done in collaboration done with the Venterea lab
+#
+# this is the first set of code I wrote for this; Vial-Leakage-Test.r has the finalized code
+#
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
@@ -14,8 +17,8 @@ vialdffull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-R
 leakagetestvials <- subset(vialdffull, grepl("Leak", GCrun))
 
 # save as csv
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
-write.csv(leakagetestvials, file=paste(pathsavefiles, "leakagetestvials.csv", sep = ""), row.names=FALSE)  
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/Exploratory/"
+write.csv(leakagetestvials, file=paste(pathsavefiles, "leakagetestvials-exploratory.csv", sep = ""), row.names=FALSE)  
 
 
 
@@ -71,8 +74,8 @@ AUrows <- grepl("^AU", leakagetestsummary$SampleName)
 leakagetestsummary <- transform(leakagetestsummary, crimpstyle = ifelse(AUrows==TRUE, as.character("auto"), as.character("hand")))
 
 # save as csv
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
-write.csv(leakagetestsummary, file=paste(pathsavefiles, "leakagetestsummary.csv", sep = ""), row.names=FALSE)  
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/Exploratory/"
+write.csv(leakagetestsummary, file=paste(pathsavefiles, "leakagetestsummary-exploratory.csv", sep = ""), row.names=FALSE)  
 
 
 
@@ -135,8 +138,8 @@ dtn2 <- dtn
 dtn2$GCrun <- factor(dtn2$GCrun)
 
 # save as csv
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
-write.csv(dtn2, file=paste(pathsavefiles, "leakagetestsummary_n2o_byrun.csv", sep = ""), row.names=FALSE)  
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/Exploratory/"
+write.csv(dtn2, file=paste(pathsavefiles, "leakagetestsummary_n2o_byrun-exploratory.csv", sep = ""), row.names=FALSE)  
 
 ## co2 leakage summary
 dtc <- summarySE(leakagetestvials, measurevar="CO2ppm", groupvars=c("GCrun","SampleName"), na.rm=TRUE)
@@ -146,14 +149,14 @@ dtc2 <- dtc
 dtc2$GCrun <- factor(dtc2$GCrun)
 
 # save as csv
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
-write.csv(dtc2, file=paste(pathsavefiles, "leakagetestsummary_co2_byrun.csv", sep = ""), row.names=FALSE)  
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/Exploratory/"
+write.csv(dtc2, file=paste(pathsavefiles, "leakagetestsummary_co2_byrun-exploratory.csv", sep = ""), row.names=FALSE)  
 
 
 ########################################################################
 # Bar graph looking at each time point (Leak0 - Leak12)
 
-pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/"
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Sensitivity-Experiments/Vial-Leakage-Test/Exploratory/"
 
 ## n2o
 
