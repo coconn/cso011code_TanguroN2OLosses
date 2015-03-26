@@ -200,27 +200,27 @@ dev.off()
 
 # a bunch of flux by factor scatter plots
 {
-scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter1b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CO2") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter1c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=LinearFlux, y=SoilMoisPercent, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CH4") + ylab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines                                                                                                                                                                                                                                         
+scatter1c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CH4") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines                                                                                                                                                                                                                                         
       se=TRUE,    # Do or don't add shaded confidence region                                                                                
       fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux N2O") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CO2") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CO2") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=LinearFlux, y=SoilTmpEnd, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + xlab("LinearFlux CH4") + ylab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CH4") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
             se=TRUE,    # Do or don't add shaded confidence region
             fullrange=T) # Extend regression lines beyond the domain of the data
 }

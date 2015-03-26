@@ -30,6 +30,8 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
 # filestoprocess = "20140310_U" # used for testing
 
 require(xlsx)
+require(ggplot2)
+library(gridExtra)
 
 ########################################################################
 # BEGIN LOOP
@@ -116,7 +118,7 @@ for (i in 1:length(filestoprocess)) {
   ambientsCHcount
   
   # vial volume info
-  airtmp <- 20 # degC
+  airtmp <- 25 # degC
   volvial <- 9 # cc
   volsample <- 12 # cc
   voltotal <- volvial + volsample # cc
@@ -137,8 +139,8 @@ for (i in 1:length(filestoprocess)) {
   vialDF$CO2c <- CO2c
   vialDF$CH4c <- CH4c
   
-  ###### Q: how come you don't use the temp corrected ambient corrections for the standards?
-  
+  # Q: how come you don't use the temp corrected ambient corrections for the standards?
+  # because that's incorporated in the temperature correction standards (see ngN_cm3_correction variable)
   
   
   
@@ -165,9 +167,9 @@ for (i in 1:length(filestoprocess)) {
   areaCH4stds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3KCO2', select=c(CH4c)) # third entry is a dummy right now
   stdtabCH4 = data.frame(area=areaCH4stds,ppm=ppmCHstds)
   stdtabCH4
-  # make (0,0) one of the points
+  # make (0,0) one of the first two points
   stdtabCH4[3,1:2]<-0
-  
+  stdtabCH4 <- rbind(stdtabCH4[3,],stdtabCH4[1,],stdtabCH4[2,])
   
   # build standards curves
   
@@ -253,10 +255,10 @@ for (i in 1:length(filestoprocess)) {
   # tmp-volume-land use dataframe
   ngN_cm3_correction <- c(341.2262)
   ngC_cm3_correction <- c(0.1462398)
-  ngCH_cm3_correction <- c(0.15) ##### What is the right number here?????  FIX THIS
+  ngCH_cm3_correction <- c(0.1462398) ##### What is the right number here?????  FIX THIS
   
   LU <- c("F","M","S")
-  degC <- c(20,20,20)
+  degC <- c(30,35,35)
   voltmpcorrN2O <- ngN_cm3_correction/(degC+273.15)
   voltmpcorrCO2 <- ngC_cm3_correction/(degC+273.15)
   voltmpcorrCH4 <- ngCH_cm3_correction/(degC+273.15)
@@ -274,7 +276,7 @@ for (i in 1:length(filestoprocess)) {
   vialDF$ngC_cm3_CH4 <- ngC_cm3_CH4
   
   
-  ###### Q: adjust tmp by land use (see line 191)
+  ###### Q: adjust tmp by land use (see ngN_cm3_N2O)
   
   ###### Q: what is the right number for line 256????? (ngCH_cm3_correction)
   
@@ -359,6 +361,55 @@ for (i in 1:length(filestoprocess)) {
   
   timezeroDF <- data.frame(timezeroLabs,timezeroNinfo,timezeroCinfo,timezeroCHinfo)
   timezeroDF$GCrun <- runsheet$GCRun[1:(tmplength+6)]
+  
+  
+  
+  
+  ########################################################################
+  # SAVE STANDARD CURVE IMAGES
+  
+  # lm line info
+  source("~/Documents/GITHUB/RPersonalFunctionsChristine/lm_eqn.r")
+  
+  # N2O standards graph
+  p1 <- ggplot(stdtabN2O, aes(x=N2Oc, y=ppm)) + geom_point() 
+  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmN2Ohigh), parse = TRUE, color="blue")
+  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmN2Olow), parse = TRUE, color="dark green") 
+  
+  # CO2 standards graph
+  p2 <- ggplot(stdtabCO2, aes(x=CO2c, y=ppm)) + geom_point() 
+  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCO2high), parse = TRUE, color="blue")
+  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCO2low), parse = TRUE, color="dark green") 
+  
+  # CH4 standards graph
+  p3 <- ggplot(stdtabCH4, aes(x=CH4c, y=ppm)) + geom_point() 
+  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCH4high), parse = TRUE, color="blue")
+  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCH4low), parse = TRUE, color="dark green") 
+  
+  
+  # where to save outputs
+  pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/GC-Standard-Curves/"
+  # reminder: GC run named filestoprocess[i]
+  
+  pdf(paste(pathsavefigs,"StandardCurves_", filestoprocess[i], ".pdf", sep=""), width=5, height=8)
+  grid.arrange(p1, p2, p3, ncol=1, main=textGrob(paste("Standard Curves, GC Run:",filestoprocess[i]),just="top"))
+  dev.off()
+  
+  
+  
+  ########################################################################
+  # SAVE VENTEREA-STYLE EXCEL PAGE ONE
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   
   
   
