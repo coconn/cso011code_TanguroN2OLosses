@@ -32,6 +32,7 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
 require(xlsx)
 require(ggplot2)
 library(gridExtra)
+library(XLConnect)
 
 ########################################################################
 # BEGIN LOOP
@@ -171,6 +172,7 @@ for (i in 1:length(filestoprocess)) {
   stdtabCH4[3,1:2]<-0
   stdtabCH4 <- rbind(stdtabCH4[3,],stdtabCH4[1,],stdtabCH4[2,])
   
+  
   # build standards curves
   
   # high level N2O calibration
@@ -227,6 +229,13 @@ for (i in 1:length(filestoprocess)) {
   lmCH4low_cor <- cor(stdtabCH4$CH4c[1:2], stdtabCH4$ppm[1:2])
   lmCH4low_pearsonsR2 <- lmCH4low_cor^2
   
+  # regression outcome data frames for saving later
+  lmN2Otab1 <- data.table(lmN2Ohigh_intercept, lmN2Ohigh_slope, lmN2Ohigh_cor, lmN2Ohigh_pearsonsR2)
+  lmN2Otab2 <- data.table(lmN2Olow_intercept, lmN2Olow_slope, lmN2Olow_cor, lmN2Olow_pearsonsR2)
+  lmCO2tab1 <- data.table(lmCO2high_intercept, lmCO2high_slope, lmCO2high_cor, lmCO2high_pearsonsR2)
+  lmCO2tab2 <- data.table(lmCO2low_intercept, lmCO2low_slope, lmCO2low_cor, lmCO2low_pearsonsR2)
+  lmCH4tab1 <- data.table(lmCH4high_intercept, lmCH4high_slope, lmCH4high_cor, lmCH4high_pearsonsR2)
+  lmCH4tab2 <- data.table(lmCH4low_intercept, lmCH4low_slope, lmCH4low_cor, lmCH4low_pearsonsR2)
   
   
   # get ppm correction columns, save to dataframe
@@ -387,31 +396,7 @@ for (i in 1:length(filestoprocess)) {
   p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCH4low), parse = TRUE, color="dark green") 
   
   
-  # where to save outputs
-  pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/GC-Standard-Curves/"
-  # reminder: GC run named filestoprocess[i]
-  
-  pdf(paste(pathsavefigs,"StandardCurves_", filestoprocess[i], ".pdf", sep=""), width=5, height=8)
-  grid.arrange(p1, p2, p3, ncol=1, main=textGrob(paste("Standard Curves, GC Run:",filestoprocess[i]),just="top"))
-  dev.off()
-  
-  
-  
-  ########################################################################
-  # SAVE VENTEREA-STYLE EXCEL PAGE ONE
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  c
   
   
   ########################################################################
@@ -468,8 +453,43 @@ for (i in 1:length(filestoprocess)) {
   
   # readline(prompt = "ready to move on?  press return.  ")
   
+  
+  
   ########################################################################
-  # SAVE THINGS
+  # SAVE VENTEREA-STYLE EXCEL GC RUN SUMMARY SHEET
+  
+  # prep data into list
+  NoPressureCounttab <- data.table(NoPressureCount)
+  GCRun <- data.table(GCRun=filestoprocess[i])
+  
+  summarysheetdata = list(GCRun=GCRun, NoPressureCount=NoPressureCounttab,
+           ambinfoDF=ambinfoDF, timezeroDF=timezeroDF,
+           standardvialsN2O=stdtabN2O, standardvialsCO2=stdtabCO2, standardvialsCH4=stdtabCH4,
+           StandardCurveInfo_lmN2Ohigh=lmN2Otab1, StandardCurveInfo_lmN2Olow=lmN2Otab2, 
+           StandardCurveInfo_lmCO2high=lmCO2tab1, StandardCurveInfo_lmCO2low=lmCO2tab2, 
+           StandardCurveInfo_lmCH4high=lmCH4tab1, StandardCurveInfo_lmCH4low=lmCH4tab2) 
+  
+  # where to save excel sheet
+  pathsavesummary = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/GC-Runs-Summary-Info/"
+  # reminder: GC run named filestoprocess[i]
+  
+  # XLConnect stuff
+  wb = loadWorkbook(paste(pathsavesummary,"GCRunSummary_", filestoprocess[i], ".xlsx", sep=""), create = TRUE)
+  # Create a new sheet
+  createSheet(wb, name = "GC Run Summary Info")
+  # cumulative length (rows) of matrices
+  # +2 = 1 for list names, 1 for header row
+  cumlen = cumsum(c(1, head(sapply(summarysheetdata, nrow), n = -1) + 3))
+  # Write data rows (implicitly vectorized!)
+  writeWorksheet(wb, data = summarysheetdata, sheet = "GC Run Summary Info", startRow = cumlen + 1, header = TRUE)
+  # Write list names
+  writeWorksheet(wb, data = as.list(names(summarysheetdata)), sheet = "GC Run Summary Info", startRow = cumlen, header = FALSE)
+  saveWorkbook(wb)
+  
+  
+  
+  ########################################################################
+  # SAVE CSV FILES, BIND OUTCOMES ONTO  RUNNING SUMMARY FILES
   
   # put GC run info into data frame
   vialDF$GCrun <- runsheet$GCRun
@@ -525,7 +545,6 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 ########################################################################
 # POSSIBLE TO DO
 
-##### export images of the standard curves
 ##### fix warnings so they export in a more readable way
 
 
