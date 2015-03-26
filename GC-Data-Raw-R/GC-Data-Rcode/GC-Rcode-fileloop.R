@@ -250,11 +250,45 @@ for (i in 1:length(filestoprocess)) {
   vialDF$CH4ppm <- CH4ppm
   
   
-  
-  
   ###### Q: how come we don't use 10N2O in the standards curves?
   ###### A: see email "two quick questions: CH4 in standards? and using 10N2O" - "Bottom line, do NOT include the 10 PPM std unless you actually had a significant number of samples showing up with Area Counts greater than the 3 PPM standard. This is very rare, and means you had very high fluxes. The N2O calibration becomes non-linear above 3PPM so this complicates things further. So you might want to let me know what you find out. -Rod"
   
+  
+  
+  
+  ########################################################################
+  # SAVE STANDARD CURVE IMAGES
+  
+  # lm line info
+  source("~/Documents/GITHUB/RPersonalFunctionsChristine/lm_eqn.r")
+  
+  # N2O standards graph
+  p1 <- ggplot(stdtabN2O, aes(x=N2Oc, y=ppm)) + geom_point() 
+  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmN2Ohigh), parse = TRUE, color="blue")
+  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmN2Olow), parse = TRUE, color="dark green") 
+  
+  # CO2 standards graph
+  p2 <- ggplot(stdtabCO2, aes(x=CO2c, y=ppm)) + geom_point() 
+  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCO2high), parse = TRUE, color="blue")
+  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCO2low), parse = TRUE, color="dark green") 
+  
+  # CH4 standards graph
+  p3 <- ggplot(stdtabCH4, aes(x=CH4c, y=ppm)) + geom_point() 
+  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCH4high), parse = TRUE, color="blue")
+  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCH4low), parse = TRUE, color="dark green") 
+  
+  
+  # where to save outputs
+  pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/GC-Standard-Curves/"
+  # reminder: GC run named filestoprocess[i]
+  
+  pdf(paste(pathsavefigs,"StandardCurves_", filestoprocess[i], ".pdf", sep=""), width=5, height=8)
+  grid.arrange(p1, p2, p3, ncol=1, main=textGrob(paste("Standard Curves, GC Run:",filestoprocess[i]),just="top"))
+  dev.off()
+  
+  png(paste(pathsavefigs,"StandardCurves_", filestoprocess[i], ".png", sep=""), width=450, height=900)
+  grid.arrange(p1, p2, p3, ncol=1, main=textGrob(paste("Standard Curves, GC Run:",filestoprocess[i]),just="top"))
+  dev.off()
   
   
   
@@ -375,31 +409,6 @@ for (i in 1:length(filestoprocess)) {
   
   
   ########################################################################
-  # SAVE STANDARD CURVE IMAGES
-  
-  # lm line info
-  source("~/Documents/GITHUB/RPersonalFunctionsChristine/lm_eqn.r")
-  
-  # N2O standards graph
-  p1 <- ggplot(stdtabN2O, aes(x=N2Oc, y=ppm)) + geom_point() 
-  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmN2Ohigh), parse = TRUE, color="blue")
-  p1 <- p1 + geom_smooth(method=lm, data=stdtabN2O[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmN2Olow), parse = TRUE, color="dark green") 
-  
-  # CO2 standards graph
-  p2 <- ggplot(stdtabCO2, aes(x=CO2c, y=ppm)) + geom_point() 
-  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCO2high), parse = TRUE, color="blue")
-  p2 <- p2 + geom_smooth(method=lm, data=stdtabCO2[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCO2low), parse = TRUE, color="dark green") 
-  
-  # CH4 standards graph
-  p3 <- ggplot(stdtabCH4, aes(x=CH4c, y=ppm)) + geom_point() 
-  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4, se=FALSE, color="blue") + annotate(geom="text", x = -Inf, y = Inf, vjust=1, hjust=-0.05, label = lm_eqn(lmCH4high), parse = TRUE, color="blue")
-  p3 <- p3 + geom_smooth(method=lm, data=stdtabCH4[1:2,], se=FALSE, fullrange=TRUE, color="dark green", linetype="dotted", lwd=1) + annotate(geom="text", x = -Inf, y = Inf, vjust=2, hjust=-0.05, label = lm_eqn(lmCH4low), parse = TRUE, color="dark green") 
-  
-  
-  c
-  
-  
-  ########################################################################
   # PRINT WARNINGS
   
   # save to txt file
@@ -476,15 +485,21 @@ for (i in 1:length(filestoprocess)) {
   # XLConnect stuff
   wb = loadWorkbook(paste(pathsavesummary,"GCRunSummary_", filestoprocess[i], ".xlsx", sep=""), create = TRUE)
   # Create a new sheet
-  createSheet(wb, name = "GC Run Summary Info")
+  createSheet(wb, name = "GCRunSummaryInfo")
   # cumulative length (rows) of matrices
   # +2 = 1 for list names, 1 for header row
   cumlen = cumsum(c(1, head(sapply(summarysheetdata, nrow), n = -1) + 3))
   # Write data rows (implicitly vectorized!)
-  writeWorksheet(wb, data = summarysheetdata, sheet = "GC Run Summary Info", startRow = cumlen + 1, header = TRUE)
+  writeWorksheet(wb, data = summarysheetdata, sheet = "GCRunSummaryInfo", startRow = cumlen + 1, header = TRUE)
   # Write list names
-  writeWorksheet(wb, data = as.list(names(summarysheetdata)), sheet = "GC Run Summary Info", startRow = cumlen, header = FALSE)
+  writeWorksheet(wb, data = as.list(names(summarysheetdata)), sheet = "GCRunSummaryInfo", startRow = cumlen, header = FALSE)
+  # insert standard curve image into worksheet - create a named region called 'graphs'
+  createName(wb, name = "graphs", formula = "GCRunSummaryInfo!$H$5")
+  # Write image to the named region created above
+  setwd(pathsavefigs)
+  addImage(wb, filename = paste("StandardCurves_", filestoprocess[i], ".png", sep=""), name="graphs", originalSize = TRUE)
   saveWorkbook(wb)
+  
   
   
   
@@ -543,9 +558,9 @@ write.csv(dataset, file=paste(pathsavefiles, "warningsfull.csv", sep = ""), row.
 
 
 ########################################################################
-# POSSIBLE TO DO
+# WAS ON TO DO LIST, NOW DONE
 
-##### fix warnings so they export in a more readable way
+# instead of printing warning in a more readable way, just built in a "venterea style summary" page to get printed
 
 
 
