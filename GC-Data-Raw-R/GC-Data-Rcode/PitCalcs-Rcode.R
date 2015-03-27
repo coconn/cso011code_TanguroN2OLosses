@@ -29,8 +29,34 @@ pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit
 ########################################################################
 # GET PIT DATA
 
-#m8,k4,mu
+# Pits: m8, k4, c2 (forest); mu (mutun, soy)
 
+toMatch <- c("cm") #"M8", "K4", "MU", "C2" # C2 doesn't work because it goes with some side-by-side chamber trials
+pitgas <- subset(vialDFfull, grepl(paste(toMatch,collapse="|"), vialDFfull$SampleName))
+
+
+
+########################################################################
+# ELIMINATE UNACCEPTABLE DATA
+
+# no pressure vials
+nopressureid <- pitgas$Pressure=="N"
+pitgas$ngN_cm3_N2O[nopressureid] <- NA
+pitgas$ngC_cm3_CO2[nopressureid] <- NA
+pitgas$ngC_cm3_CH4[nopressureid] <- NA
+
+# some vials got repeated because of GC autosampler problems
+
+
+
+
+
+########################################################################
+# SAVE CSV
+
+# save pitgasfull as csv file
+pitgasfull <- pitgas
+write.csv(pitgasfull, file=paste(pathsavefiles, "pitgasfull.csv", sep = ""), row.names=FALSE)  
 
 
 
