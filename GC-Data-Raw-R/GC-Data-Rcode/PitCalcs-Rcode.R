@@ -117,13 +117,14 @@ pitgas$sampleorder[grep("-B", pitgas$SampleName)] <- "B"
 pitgas$sampleorder[grep("-C", pitgas$SampleName)] <- "C"
 
 
-
 ########################################################################
 # IMPROVE DATE INFO
 
 pitgas$SampleDate <- gsub("[.]","/",pitgas$SampleDate)
-pitgas$SampleDate <- as.Date(pitgas$SampleDate2, format="%Y/%m/%d")
+pitgas$SampleDate <- as.Date(pitgas$SampleDate, format="%Y/%m/%d")
 
+# month of sampling
+pitgas <- transform(pitgas, Month = month(pitgas$SampleDate, label=TRUE))
 
 
 ########################################################################
