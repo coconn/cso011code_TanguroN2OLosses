@@ -29,10 +29,11 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC
 #filestoprocess = c("20131104_AA","20131105_BB") # what is a good automated way to get this?  see below for attempts
 # filestoprocess = "20140310_U" # used for testing
 
-require(xlsx)
-require(ggplot2)
+library(xlsx)
+library(ggplot2)
 library(gridExtra)
 library(XLConnect)
+library(data.table)
 
 ########################################################################
 # BEGIN LOOP
@@ -158,6 +159,16 @@ for (i in 1:length(filestoprocess)) {
   areaN2Ostds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3N2O', select=c(N2Oc))
   stdtabN2O = data.frame(area=areaN2Ostds,ppm=ppmNstds)
   stdtabN2O
+  
+  # redefine using 10N2O standard if it's for the leak test
+  # Mix1, Mix2, 3N2O, 10N2O 
+  toMatch <- c("Leak") # c("Leak", "Jank") if you wanted to include 10N2O from other GC runs
+  if (length(grep(paste(toMatch,collapse="|"), filestoprocess[i]))>0) {
+        areaN2Ostds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3N2O' | vialDF$SampleName=='10N2O', select=c(N2Oc))
+        ppmNstds <- c(0.301,1.57,3,10) 
+        stdtabN2O = data.frame(area=areaN2Ostds,ppm=ppmNstds)
+        stdtabN2O
+  } 
   
   areaCO2stds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3KCO2', select=c(CO2c))
   stdtabCO2 = data.frame(area=areaCO2stds,ppm=ppmCstds)
@@ -482,6 +493,11 @@ for (i in 1:length(filestoprocess)) {
   pathsavesummary = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/GC-Runs-Summary-Info/"
   # reminder: GC run named filestoprocess[i]
   
+  # if excel file already exists, delete it
+  if (file.exists(paste(pathsavesummary,"GCRunSummary_", filestoprocess[i], ".xlsx", sep=""))) {
+        file.remove(paste(pathsavesummary,"GCRunSummary_", filestoprocess[i], ".xlsx", sep="")) 
+  } 
+  
   # XLConnect stuff
   wb = loadWorkbook(paste(pathsavesummary,"GCRunSummary_", filestoprocess[i], ".xlsx", sep=""), create = TRUE)
   # Create a new sheet
@@ -494,7 +510,7 @@ for (i in 1:length(filestoprocess)) {
   # Write list names
   writeWorksheet(wb, data = as.list(names(summarysheetdata)), sheet = "GCRunSummaryInfo", startRow = cumlen, header = FALSE)
   # insert standard curve image into worksheet - create a named region called 'graphs'
-  createName(wb, name = "graphs", formula = "GCRunSummaryInfo!$H$5")
+  createName(wb, name = "graphs", formula = "GCRunSummaryInfo!$H$5", overwrite = TRUE)
   # Write image to the named region created above
   setwd(pathsavefigs)
   addImage(wb, filename = paste("StandardCurves_", filestoprocess[i], ".png", sep=""), name="graphs", originalSize = TRUE)
