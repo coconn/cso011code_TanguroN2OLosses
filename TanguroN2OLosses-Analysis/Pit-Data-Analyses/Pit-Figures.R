@@ -19,105 +19,85 @@ library(gridExtra)
 library(scales)
 library(plyr)
 library(data.table)
-
+library(lubridate)
 
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit-Data-Rprocessed/"
 pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Pit-Data-Analyses/PitGasFigures/"
 
+# create a col to assign a color in the graphs
+pitgasfull <- transform(pitgasfull, color.use = ifelse(LUtype=="M", as.character("darkorange"), ifelse(LUtype=="F", as.character("darkgreen"), as.character("darkblue"))))
+
+# create a col to assign a better name to each land use
+pitgasfull <- transform(pitgasfull, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
+
+# create a col to assign season
+pitgasfull <- transform(pitgasfull, Month = month(pitgasfull$SampleDate, label=TRUE))
 
 
 ########################################################################
-# GET PIT DATA
+# SIMPLE SCATTER PLOT
 
-# Pits: m8, k4, c2 (forest); mu (mutun, soy)
+# Run the functions length, mean, and sd on the value of "change" for each group, 
+# broken down by sex + condition
 
-toMatch <- c("cm") #"M8", "K4", "MU", "C2" # C2 doesn't work because it goes with some side-by-side chamber trials
-pitgas <- subset(vialDFfull, grepl(paste(toMatch,collapse="|"), vialDFfull$SampleName))
+# summarySE using plyr
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
+
+# summarySE
+summarytab1 <- summarySE(data=pitgasfull, measurevar="N2Oppm", c("pitID", "sampledepth", "SampleDate", "LUtype", "LUname", "color.use", "Month"), na.rm=TRUE, renameallcols=TRUE)
+summarytab2 <- summarySE(data=pitgasfull, measurevar="CO2ppm", c("pitID", "sampledepth", "SampleDate"), na.rm=TRUE, renameallcols=TRUE)
+summarytab3 <- summarySE(data=pitgasfull, measurevar="CH4ppm", c("pitID", "sampledepth", "SampleDate"), na.rm=TRUE, renameallcols=TRUE)
+
+# join
+pitgassummary <- join(x = summarytab1, y = summarytab2, by = c("pitID", "sampledepth", "SampleDate", "N"))
+pitgassummary <- join(x = jointmp, y = summarytab3, by = c("pitID", "sampledepth", "SampleDate", "N"))
 
 
 
-########################################################################
-# ELIMINATE UNACCEPTABLE DATA
-
-# no pressure vials
-nopressureid <- pitgas$Pressure=="N"
-NoPressureCount <- length(which(pitgas$Pressure=="N"))
-
-pitgas$ngN_cm3_N2O[nopressureid] <- NA
-pitgas$ngC_cm3_CO2[nopressureid] <- NA
-pitgas$ngC_cm3_CH4[nopressureid] <- NA
-
-pitgas$N2Oppm[nopressureid] <- NA
-pitgas$CO2ppm[nopressureid] <- NA
-pitgas$CH4ppm[nopressureid] <- NA
-
-# print info
-print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.", sep = ""))
-
-# some vials got repeated because of GC autosampler problems
-rerunid <- grep("Rerun_", pitgas$SampleName)
-
-pitgas$ngN_cm3_N2O[rerunid] <- NA
-pitgas$ngC_cm3_CO2[rerunid] <- NA
-pitgas$ngC_cm3_CH4[rerunid] <- NA
-
-pitgas$N2Oppm[rerunid] <- NA
-pitgas$CO2ppm[rerunid] <- NA
-pitgas$CH4ppm[rerunid] <- NA
-
-# any other vials that didn't seem to get sampled?
-nodata <- pitgas$N2Oraw<1.0
-
-pitgas$ngN_cm3_N2O[nodata] <- NA
-pitgas$ngC_cm3_CO2[nodata] <- NA
-pitgas$ngC_cm3_CH4[nodata] <- NA
-
-pitgas$N2Oppm[nodata] <- NA
-pitgas$CO2ppm[nodata] <- NA
-pitgas$CH4ppm[nodata] <- NA
-
-# recall that all three of these vials got rerun in the GC, so there is no data that is truly missing, only blank rows to be struck
-
-# some of the land use codes are "r" because of the rerun vials
-# site and LUtype have "re" and "r"
-Rid <- grep("R", pitgas$Site)
-
-samplenamesRe <- pitgas$SampleName[Rid]
-sitetmp <- substr(samplenamesRe, 7, 8)
-LUtmp <- substr(samplenamesRe, 7, 7)
-
-pitgas$Site[Rid] <- sitetmp
-pitgas$LUtype[Rid] <- LUtmp
 
 
 ########################################################################
-# ADD USEFUL COLUMNS
+# SIMPLE SCATTERPLOT
 
-# pit ID
-pitgas$pitID <- -9999
-pitgas$pitID[grep("M8", pitgas$SampleName)] <- "M8"
-pitgas$pitID[grep("K4", pitgas$SampleName)] <- "K4"
-pitgas$pitID[grep("MU", pitgas$SampleName)] <- "MU"
-pitgas$pitID[grep("C2", pitgas$SampleName)] <- "C2"
+ggplot(pitgassummary, aes(x=sampledepth, y=meanN2Oppm)) + geom_point(shape=1) + geom_line() + coord_flip() + scale_x_reverse() # figure out how to parse this by season and by pit (facet between seasons?)
 
-# depth
-pitgas$sampledepth <- -9999
-pitgas$sampledepth[grep("15cm", pitgas$SampleName)] <- 15
-pitgas$sampledepth[grep("40cm", pitgas$SampleName)] <- 40
-pitgas$sampledepth[grep("75cm", pitgas$SampleName)] <- 75
-pitgas$sampledepth[grep("150cm", pitgas$SampleName)] <- 150
-pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
-pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
-pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
+
+qplot(depths, values, geom="line", group=sites) + coord_flip()
+
+
+
+
+scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+                                                                                                                                                                                                                                          se=TRUE,    # Do or don't add shaded confidence region
+                                                                                                                                                                                                                                          fullrange=T) # Extend regression lines beyond the domain of the data
+
+
+
+
+n2olin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
+      geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
+      geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+# faceting
+n2olinfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
+      geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
+      geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+# loess smooth included on facets
+n2olinfacetloess <- n2olinfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+
+
+
+
+
+
+
 
 
 ########################################################################
 # SAVE CSV
 
-# save pitgasfull as csv file
-pitgasfull <- pitgas
-write.csv(pitgasfull, file=paste(pathsavefiles, "pitgasfull.csv", sep = ""), row.names=FALSE)  
+# save as csv
+write.csv(pitgassummary, file=paste(pathsavefiles, "pitgassummary.csv", sep = ""), row.names=FALSE)  
 
 
 
