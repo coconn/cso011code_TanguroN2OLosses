@@ -1,4 +1,4 @@
-# PitCalcs-Rcode.R
+# Pit-Figures.R
 # taking trace gas vial data associated with soil pits and making a tidy data set
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
@@ -10,15 +10,16 @@
 
 
 ########################################################################
-# BRING IN DATA, MAKE DATAFRAME
+# BRING IN DATA / PREP
 
-vialDFfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/vialDFfull.csv", stringsAsFactors=FALSE)
+pitgasfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit-Data-Rprocessed/pitgasfull.csv", stringsAsFactors=FALSE)
 
-# make new column to ensure no repeats (easycallname = unique per chamber)
-vialDFfull$easycallname <- do.call(paste, c(vialDFfull[c("Site", "SampleDate", "Chamber")], sep = "_")) 
+library(ggplot2)
+library(gridExtra)
+library(scales)
+library(plyr)
+library(data.table)
 
-#in case I want to see all the names outside of R environment
-#write.csv(vialDFfull, file=paste("vialDFfull_prac.csv", sep = ""), row.names=FALSE)  
 
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit-Data-Rprocessed/"
@@ -91,7 +92,7 @@ pitgas$LUtype[Rid] <- LUtmp
 
 
 ########################################################################
-# ADD USEFUL COLUMNS FOR PIT INFO
+# ADD USEFUL COLUMNS
 
 # pit ID
 pitgas$pitID <- -9999
@@ -109,15 +110,6 @@ pitgas$sampledepth[grep("150cm", pitgas$SampleName)] <- 150
 pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
 pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
 pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
-
-
-
-########################################################################
-# IMPROVE DATE INFO
-
-pitgas$SampleDate <- gsub("[.]","/",pitgas$SampleDate)
-pitgas$SampleDate <- as.Date(pitgas$SampleDate2, format="%Y/%m/%d")
-
 
 
 ########################################################################

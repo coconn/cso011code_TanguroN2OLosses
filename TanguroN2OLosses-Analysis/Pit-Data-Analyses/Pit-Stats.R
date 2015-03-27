@@ -22,7 +22,7 @@ vialDFfull$easycallname <- do.call(paste, c(vialDFfull[c("Site", "SampleDate", "
 
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit-Data-Rprocessed/"
-pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Pit-Data-Analyses/PitGasFigures/"
+pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/Pit-Data-Rprocessed/PitGasFigures/"
 
 
 
@@ -91,7 +91,7 @@ pitgas$LUtype[Rid] <- LUtmp
 
 
 ########################################################################
-# ADD USEFUL COLUMNS FOR PIT INFO
+# ADD USEFUL COLUMNS
 
 # pit ID
 pitgas$pitID <- -9999
@@ -109,15 +109,6 @@ pitgas$sampledepth[grep("150cm", pitgas$SampleName)] <- 150
 pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
 pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
 pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
-
-
-
-########################################################################
-# IMPROVE DATE INFO
-
-pitgas$SampleDate <- gsub("[.]","/",pitgas$SampleDate)
-pitgas$SampleDate <- as.Date(pitgas$SampleDate2, format="%Y/%m/%d")
-
 
 
 ########################################################################
