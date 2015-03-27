@@ -41,12 +41,52 @@ pitgas <- subset(vialDFfull, grepl(paste(toMatch,collapse="|"), vialDFfull$Sampl
 
 # no pressure vials
 nopressureid <- pitgas$Pressure=="N"
+NoPressureCount <- length(which(pitgas$Pressure=="N"))
+
 pitgas$ngN_cm3_N2O[nopressureid] <- NA
 pitgas$ngC_cm3_CO2[nopressureid] <- NA
 pitgas$ngC_cm3_CH4[nopressureid] <- NA
 
-# some vials got repeated because of GC autosampler problems
+pitgas$N2Oppm[nopressureid] <- NA
+pitgas$CO2ppm[nopressureid] <- NA
+pitgas$CH4ppm[nopressureid] <- NA
 
+# some vials got repeated because of GC autosampler problems
+rerunid <- grep("Rerun_", pitgas$SampleName)
+
+pitgas$ngN_cm3_N2O[rerunid] <- NA
+pitgas$ngC_cm3_CO2[rerunid] <- NA
+pitgas$ngC_cm3_CH4[rerunid] <- NA
+
+pitgas$N2Oppm[rerunid] <- NA
+pitgas$CO2ppm[rerunid] <- NA
+pitgas$CH4ppm[rerunid] <- NA
+
+# any other vials that didn't seem to get sampled?
+nodata <- pitgas$N2Oraw<1.0
+
+pitgas$ngN_cm3_N2O[nodata] <- NA
+pitgas$ngC_cm3_CO2[nodata] <- NA
+pitgas$ngC_cm3_CH4[nodata] <- NA
+
+pitgas$N2Oppm[nodata] <- NA
+pitgas$CO2ppm[nodata] <- NA
+pitgas$CH4ppm[nodata] <- NA
+
+# recall that all three of these vials got rerun in the GC, so there is no data that is truly missing, only blank rows to be struck
+
+# print info
+print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.", sep = ""))
+
+
+
+########################################################################
+# ADD USEFUL COLUMNS
+
+# pit ID
+
+
+# depth
 
 
 
