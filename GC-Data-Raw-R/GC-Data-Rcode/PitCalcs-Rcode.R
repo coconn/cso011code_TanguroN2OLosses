@@ -110,6 +110,12 @@ pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
 pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
 pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
 
+# sample order
+pitgas$sampleorder <- -9999
+pitgas$sampleorder[grep("-A", pitgas$SampleName)] <- "A"
+pitgas$sampleorder[grep("-B", pitgas$SampleName)] <- "B"
+pitgas$sampleorder[grep("-C", pitgas$SampleName)] <- "C"
+
 
 
 ########################################################################
