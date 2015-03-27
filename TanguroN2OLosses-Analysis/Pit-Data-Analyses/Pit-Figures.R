@@ -67,7 +67,7 @@ pitgassummary <- join(x = pitgassummary, y = summarytab3, by = c("pitID", "sampl
 
 
 ########################################################################
-# SIMPLE SCATTERPLOT
+# SIMPLE SCATTERPLOTS OVER DEPTH
 
 p1 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanN2Oppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanN2Oppm-sdN2Oppm, ymax=meanN2Oppm+sdN2Oppm), width=5)
 
@@ -91,6 +91,35 @@ dev.off()
 # grid.arrange
 png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations.png", sep=""),width=12,height=6,units="in",res=150)
 grid.arrange(p1, p2, p3, nrow = 1, ncol = 3, main="Trace Gas Concentration, Tanguro Soil Pits")
+dev.off()
+
+
+
+########################################################################
+# VIAL SAMPLING ORDER COMPARISON
+
+p1 <- ggplot(pitgasfull, aes(x=sampledepth, y=N2Oppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+p2 <- ggplot(pitgasfull, aes(x=sampledepth, y=CO2ppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+p3 <- ggplot(pitgasfull, aes(x=sampledepth, y=CH4ppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+# individ gas graphs
+png(file = paste(pathsavefigs, "soilpit-sampleorder-N2O.png", sep=""),width=10,height=6,units="in",res=150)
+p1 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+png(file = paste(pathsavefigs, "soilpit-sampleorder-CO2.png", sep=""),width=10,height=6,units="in",res=150)
+p2 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+png(file = paste(pathsavefigs, "soilpit-sampleorder-CH4.png", sep=""),width=10,height=6,units="in",res=150)
+p3 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+# grid.arrange
+png(file = paste(pathsavefigs, "soilpit-sampleorder.png", sep=""),width=8,height=16,units="in",res=150)
+grid.arrange(p1, p2, p3, nrow = 3, ncol = 1, main="Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
 dev.off()
 
 
