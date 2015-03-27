@@ -31,12 +31,22 @@ pitgasfull <- transform(pitgasfull, color.use = ifelse(LUtype=="M", as.character
 # create a col to assign a better name to each land use
 pitgasfull <- transform(pitgasfull, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
 
-# create a col to assign season
-pitgasfull <- transform(pitgasfull, Month = month(pitgasfull$SampleDate, label=TRUE))
+
+########################################################################
+# THROW OUT ONE WEIRD DATA POINT
+
+# get rid of that one weird rerun vial that is way off from the other two
+rerunid <- grep("F1-K4-250cm-C_rerun", pitgasfull$SampleName)
+pitgasfull$ngN_cm3_N2O[rerunid] <- NA
+pitgasfull$ngC_cm3_CO2[rerunid] <- NA
+pitgasfull$ngC_cm3_CH4[rerunid] <- NA
+pitgasfull$N2Oppm[rerunid] <- NA
+pitgasfull$CO2ppm[rerunid] <- NA
+pitgasfull$CH4ppm[rerunid] <- NA
 
 
 ########################################################################
-# SIMPLE SCATTER PLOT
+# DESCRIPTIVE STATS SUMMARY
 
 # Run the functions length, mean, and sd on the value of "change" for each group, 
 # broken down by sex + condition
@@ -51,8 +61,7 @@ summarytab3 <- summarySE(data=pitgasfull, measurevar="CH4ppm", c("pitID", "sampl
 
 # join
 pitgassummary <- join(x = summarytab1, y = summarytab2, by = c("pitID", "sampledepth", "SampleDate", "N"))
-pitgassummary <- join(x = jointmp, y = summarytab3, by = c("pitID", "sampledepth", "SampleDate", "N"))
-
+pitgassummary <- join(x = pitgassummary, y = summarytab3, by = c("pitID", "sampledepth", "SampleDate", "N"))
 
 
 
@@ -60,43 +69,36 @@ pitgassummary <- join(x = jointmp, y = summarytab3, by = c("pitID", "sampledepth
 ########################################################################
 # SIMPLE SCATTERPLOT
 
-ggplot(pitgassummary, aes(x=sampledepth, y=meanN2Oppm)) + geom_point(shape=1) + geom_line() + coord_flip() + scale_x_reverse() # figure out how to parse this by season and by pit (facet between seasons?)
+p1 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanN2Oppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanN2Oppm-sdN2Oppm, ymax=meanN2Oppm+sdN2Oppm), width=5)
 
+p2 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCO2ppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanCO2ppm-sdCO2ppm, ymax=meanCO2ppm+sdCO2ppm), width=5)
 
-qplot(depths, values, geom="line", group=sites) + coord_flip()
+p3 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCH4ppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanCH4ppm-sdCH4ppm, ymax=meanCH4ppm+sdCH4ppm), width=5)
 
+# individ gas graphs
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-N2O.png", sep=""),width=6,height=6,units="in",res=150)
+p1 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
 
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CO2.png", sep=""),width=6,height=6,units="in",res=150)
+p2 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
 
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CH4.png", sep=""),width=6,height=6,units="in",res=150)
+p3 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
 
-scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
-                                                                                                                                                                                                                                          se=TRUE,    # Do or don't add shaded confidence region
-                                                                                                                                                                                                                                          fullrange=T) # Extend regression lines beyond the domain of the data
-
-
-
-
-n2olin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
-      geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
-      geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
-# faceting
-n2olinfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
-      geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
-      geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
-# loess smooth included on facets
-n2olinfacetloess <- n2olinfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
-
-
-
-
-
-
+# grid.arrange
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations.png", sep=""),width=12,height=6,units="in",res=150)
+grid.arrange(p1, p2, p3, nrow = 1, ncol = 3, main="Trace Gas Concentration, Tanguro Soil Pits")
+dev.off()
 
 
 
 ########################################################################
 # SAVE CSV
 
-# save as csv
+# save summary as csv
 write.csv(pitgassummary, file=paste(pathsavefiles, "pitgassummary.csv", sep = ""), row.names=FALSE)  
 
 
