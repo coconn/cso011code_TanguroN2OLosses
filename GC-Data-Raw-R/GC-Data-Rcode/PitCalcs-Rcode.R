@@ -51,6 +51,9 @@ pitgas$N2Oppm[nopressureid] <- NA
 pitgas$CO2ppm[nopressureid] <- NA
 pitgas$CH4ppm[nopressureid] <- NA
 
+# print info
+print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.", sep = ""))
+
 # some vials got repeated because of GC autosampler problems
 rerunid <- grep("Rerun_", pitgas$SampleName)
 
@@ -75,20 +78,37 @@ pitgas$CH4ppm[nodata] <- NA
 
 # recall that all three of these vials got rerun in the GC, so there is no data that is truly missing, only blank rows to be struck
 
-# print info
-print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.", sep = ""))
+# some of the land use codes are "r" because of the rerun vials
+# site and LUtype have "re" and "r"
+Rid <- grep("R", pitgas$Site)
 
+samplenamesRe <- pitgas$SampleName[Rid]
+sitetmp <- substr(samplenamesRe, 7, 8)
+LUtmp <- substr(samplenamesRe, 7, 7)
+
+pitgas$Site[Rid] <- sitetmp
+pitgas$LUtype[Rid] <- LUtmp
 
 
 ########################################################################
 # ADD USEFUL COLUMNS
 
 # pit ID
-
+pitgas$pitID <- -9999
+pitgas$pitID[grep("M8", pitgas$SampleName)] <- "M8"
+pitgas$pitID[grep("K4", pitgas$SampleName)] <- "K4"
+pitgas$pitID[grep("MU", pitgas$SampleName)] <- "MU"
+pitgas$pitID[grep("C2", pitgas$SampleName)] <- "C2"
 
 # depth
-
-
+pitgas$sampledepth <- -9999
+pitgas$sampledepth[grep("15cm", pitgas$SampleName)] <- 15
+pitgas$sampledepth[grep("40cm", pitgas$SampleName)] <- 40
+pitgas$sampledepth[grep("75cm", pitgas$SampleName)] <- 75
+pitgas$sampledepth[grep("150cm", pitgas$SampleName)] <- 150
+pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
+pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
+pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
 
 
 ########################################################################
@@ -102,17 +122,8 @@ write.csv(pitgasfull, file=paste(pathsavefiles, "pitgasfull.csv", sep = ""), row
 
 
 
-
-
-
-
 ########################################################################
 # NOTES AND TESTING
-
-# ran this all the way through for "SM_A_2014.02.20" and works!
-# some fluxes are slightly off (for instance, fluxhere <- "SM_A_2014.02.14") because in the excel it was temperature corrected to 25degC and in this code I temperature corrected everything to 20degC
-
-# done for CH4 on 24-Feb-2015
 
 
 
