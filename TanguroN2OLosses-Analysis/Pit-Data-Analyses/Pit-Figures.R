@@ -44,6 +44,16 @@ pitgasfull$N2Oppm[rerunid] <- NA
 pitgasfull$CO2ppm[rerunid] <- NA
 pitgasfull$CH4ppm[rerunid] <- NA
 
+# throw out vials that were drawn first in february
+vialstodrop <- c("A","B") # c("A")
+tmp <- grepl(paste(vialstodrop,collapse="|"),pitgasfull$SampleName) & grepl("Feb",pitgasfull$Month)
+pitgasfull$ngN_cm3_N2O[tmp] <- NA
+pitgasfull$ngC_cm3_CO2[tmp] <- NA
+pitgasfull$ngC_cm3_CH4[tmp] <- NA
+pitgasfull$N2Oppm[tmp] <- NA
+pitgasfull$CO2ppm[tmp] <- NA
+pitgasfull$CH4ppm[tmp] <- NA
+
 
 ########################################################################
 # DESCRIPTIVE STATS SUMMARY
@@ -76,20 +86,20 @@ p2 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCO2ppm)) + geom_point(shape
 p3 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCH4ppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanCH4ppm-sdCH4ppm, ymax=meanCH4ppm+sdCH4ppm), width=5)
 
 # individ gas graphs
-png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-N2O.png", sep=""),width=6,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-N2O.png", sep=""),width=6,height=6,units="in",res=400)
 p1 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
 dev.off()
 
-png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CO2.png", sep=""),width=6,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CO2.png", sep=""),width=6,height=6,units="in",res=400)
 p2 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
 dev.off()
 
-png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CH4.png", sep=""),width=6,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CH4.png", sep=""),width=6,height=6,units="in",res=400)
 p3 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
 dev.off()
 
 # grid.arrange
-png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations.png", sep=""),width=12,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-tracegasconcentrations.png", sep=""),width=12,height=6,units="in",res=400)
 grid.arrange(p1, p2, p3, nrow = 1, ncol = 3, main="Trace Gas Concentration, Tanguro Soil Pits")
 dev.off()
 
@@ -105,20 +115,20 @@ p2 <- ggplot(pitgasfull, aes(x=sampledepth, y=CO2ppm)) + geom_point(shape=1, aes
 p3 <- ggplot(pitgasfull, aes(x=sampledepth, y=CH4ppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
 
 # individ gas graphs
-png(file = paste(pathsavefigs, "soilpit-sampleorder-N2O.png", sep=""),width=10,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-sampleorder-N2O.png", sep=""),width=10,height=6,units="in",res=400)
 p1 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
 dev.off()
 
-png(file = paste(pathsavefigs, "soilpit-sampleorder-CO2.png", sep=""),width=10,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-sampleorder-CO2.png", sep=""),width=10,height=6,units="in",res=400)
 p2 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
 dev.off()
 
-png(file = paste(pathsavefigs, "soilpit-sampleorder-CH4.png", sep=""),width=10,height=6,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-sampleorder-CH4.png", sep=""),width=10,height=6,units="in",res=400)
 p3 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
 dev.off()
 
 # grid.arrange
-png(file = paste(pathsavefigs, "soilpit-sampleorder.png", sep=""),width=8,height=16,units="in",res=150)
+png(file = paste(pathsavefigs, "soilpit-sampleorder.png", sep=""),width=8,height=16,units="in",res=400)
 grid.arrange(p1, p2, p3, nrow = 3, ncol = 1, main="Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
 dev.off()
 
@@ -138,5 +148,70 @@ write.csv(pitgassummary, file=paste(pathsavefiles, "pitgassummary.csv", sep = ""
 # NOTES AND TESTING
 
 
+
+
+
+
+
+
+
+# as pdfs
+
+
+########################################################################
+# SIMPLE SCATTERPLOTS OVER DEPTH
+
+p1 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanN2Oppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanN2Oppm-sdN2Oppm, ymax=meanN2Oppm+sdN2Oppm), width=5)
+
+p2 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCO2ppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanCO2ppm-sdCO2ppm, ymax=meanCO2ppm+sdCO2ppm), width=5)
+
+p3 <- ggplot(pitgassummary, aes(x=sampledepth, y=meanCH4ppm)) + geom_point(shape=1) + geom_line(aes(color=Month)) + coord_flip() + scale_x_reverse() + facet_grid(pitID ~ .) + xlab("sample depth (cm)") + geom_errorbar(aes(ymin=meanCH4ppm-sdCH4ppm, ymax=meanCH4ppm+sdCH4ppm), width=5)
+
+# individ gas graphs
+pdf(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-N2O.pdf", sep=""),width=6,height=6)
+p1 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
+
+pdf(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CO2.pdf", sep=""),width=6,height=6)
+p2 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
+
+pdf(file = paste(pathsavefigs, "soilpit-tracegasconcentrations-CH4.pdf", sep=""),width=6,height=6)
+p3 + labs(title = "Trace Gas Concentration, Tanguro Soil Pits") 
+dev.off()
+
+# grid.arrange
+pdf(file = paste(pathsavefigs, "soilpit-tracegasconcentrations.pdf", sep=""),width=12,height=6)
+grid.arrange(p1, p2, p3, nrow = 1, ncol = 3, main="Trace Gas Concentration, Tanguro Soil Pits")
+dev.off()
+
+
+
+########################################################################
+# VIAL SAMPLING ORDER COMPARISON
+
+p1 <- ggplot(pitgasfull, aes(x=sampledepth, y=N2Oppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+p2 <- ggplot(pitgasfull, aes(x=sampledepth, y=CO2ppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+p3 <- ggplot(pitgasfull, aes(x=sampledepth, y=CH4ppm)) + geom_point(shape=1, aes(color=sampleorder)) + facet_grid(Month ~ pitID) + geom_line(aes(color=sampleorder)) + xlab("sample depth (cm)") + scale_colour_brewer(palette = "Dark2", labels=c("A (Vial 1)", "B (Vial 2)", "C (Vial 3)"))
+
+# individ gas graphs
+pdf(file = paste(pathsavefigs, "soilpit-sampleorder-N2O.pdf", sep=""),width=10,height=6)
+p1 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+pdf(file = paste(pathsavefigs, "soilpit-sampleorder-CO2.pdf", sep=""),width=10,height=6)
+p2 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+pdf(file = paste(pathsavefigs, "soilpit-sampleorder-CH4.pdf", sep=""),width=10,height=6)
+p3 + labs(title = "Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
+
+# grid.arrange
+pdf(file = paste(pathsavefigs, "soilpit-sampleorder.pdf", sep=""),width=8,height=16)
+grid.arrange(p1, p2, p3, nrow = 3, ncol = 1, main="Sampling Order for Trace Gas Vials, Tanguro Soil Pits")
+dev.off()
 
 
