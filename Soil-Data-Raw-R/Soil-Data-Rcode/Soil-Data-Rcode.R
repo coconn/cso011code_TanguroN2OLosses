@@ -1,12 +1,10 @@
-# PitCalcs-Rcode.R
-# taking trace gas vial data associated with soil pits and making a tidy data set
+# Soil-Data-Rcode.R
+# taking soil data from Tanguro trace gas project and making tidy data sets
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
-# requires files created in GC-Rcode-fileloop.R
-
 # output products:
-# pitgasfull.csv : master csv of soil pit gas sampling
+# soilNfull.csv : master csv of nitrogen extraction data
 
 
 ########################################################################
@@ -114,9 +112,9 @@ pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
 ########################################################################
 # SAVE CSV
 
-# save pitgasfull as csv file
-pitgasfull <- pitgas
-write.csv(pitgasfull, file=paste(pathsavefiles, "pitgasfull.csv", sep = ""), row.names=FALSE)  
+# save soilNfull as csv file
+soilNfull <- soilN
+write.csv(soilNfull, file=paste(pathsavefiles, "soilNfull.csv", sep = ""), row.names=FALSE)  
 
 
 
