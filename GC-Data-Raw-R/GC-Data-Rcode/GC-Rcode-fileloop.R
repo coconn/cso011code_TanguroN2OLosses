@@ -43,6 +43,8 @@ vialDFfull <- data.frame()
 ambinfoDFfull <- data.frame()
 timezeroDFfull <- data.frame()
 
+# use 2 or 3 points in CH4 standard curve?
+CH4curvepts <- 2 # CH4curvepts <- 2 # CH4curvepts <- 3
 
 for (i in 1:length(filestoprocess)) {
   
@@ -153,7 +155,7 @@ for (i in 1:length(filestoprocess)) {
   ppmNstds <- c(0.301,1.57,3) # Mix1, Mix2, 3N2O
   ppmCstds <- c(600,1000,3000) # Mix1, Mix2, 3KCO2
   ppmCHstds <- c(1,1.7,0) # Mix1, Mix2, (0,0) - see email "two quick questions: CH4 in standards? and using 10N2O"
-    
+  
   # regression dataframes
   
   areaN2Ostds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='Mix2' | vialDF$SampleName=='3N2O', select=c(N2Oc))
@@ -183,6 +185,16 @@ for (i in 1:length(filestoprocess)) {
   stdtabCH4[3,1:2]<-0
   stdtabCH4 <- rbind(stdtabCH4[3,],stdtabCH4[1,],stdtabCH4[2,])
   
+  # only use 2 CH4 points in standard curve?
+  if (CH4curvepts==2) {
+        ppmCHstds <- c(1,0) # Mix1, (0,0) - see email "standard curve follow up for leak test"
+        areaCH4stds <- subset(vialDF, vialDF$SampleName=='Mix1' | vialDF$SampleName=='3KCO2', select=c(CH4c)) # second entry is a dummy right now
+        stdtabCH4 = data.frame(area=areaCH4stds,ppm=ppmCHstds)
+        stdtabCH4
+        # make (0,0) one of the first two points
+        stdtabCH4[2,1:2]<-0
+        stdtabCH4 <- rbind(stdtabCH4[2,],stdtabCH4[1,])
+  }
   
   # build standards curves
   
@@ -263,8 +275,8 @@ for (i in 1:length(filestoprocess)) {
   
   ###### Q: how come we don't use 10N2O in the standards curves?
   ###### A: see email "two quick questions: CH4 in standards? and using 10N2O" - "Bottom line, do NOT include the 10 PPM std unless you actually had a significant number of samples showing up with Area Counts greater than the 3 PPM standard. This is very rare, and means you had very high fluxes. The N2O calibration becomes non-linear above 3PPM so this complicates things further. So you might want to let me know what you find out. -Rod"
-  
-  
+  ###### A: also, note that we DO use the 10N2O value in the leak tests
+
   
   
   ########################################################################
