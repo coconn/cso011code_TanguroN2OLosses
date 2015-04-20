@@ -1,5 +1,8 @@
-# Soil-Data-Rcode.R
-# taking soil data from Tanguro trace gas project and making tidy data sets
+# Soil-Data-Cleaning-PreHandSorting-Rcode.R
+# taking soil data from Tanguro trace gas project that I received directly from CENA
+# parsing the data so it's manageable by hand
+# some excel cleaning was done by hand after this step (hence "PreHandSorting")
+#
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
@@ -23,11 +26,10 @@ library(tidyr)
 library(stringi)
 
 # where to save outputs
-pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-Rprocessed/"
-pathsavefigs = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Soil-Data-Figures/"
+pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/"
 
 # how many excel files are there
-soildatafolder = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/Soil N Extractions/"
+soildatafolder = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/Soil N Extractions/CENA data - everything received/"
 filenames <- list.files(soildatafolder, pattern="*.xls*")
 
 
@@ -115,11 +117,93 @@ df$Chamber <- -9999
 df$Chamber[grep("A_", df$sampleID)] <- "A"; df$Chamber[grep("B_", df$sampleID)] <- "B"; df$Chamber[grep("C_", df$sampleID)] <- "C"; df$Chamber[grep("D_", df$sampleID)] <- "D"; df$Chamber[grep("E_", df$sampleID)] <- "E"
 df$Chamber[grep("bnk", df$sampleID)] <- "NA"
 
+# other useful info columns
+
 # include the 24 hr vs. 48 test as a column
+df$test2448 <- "NA"
+df$test2448[grep("24", df$labelnotes)] <- "24"; df$test2448[grep("48", df$labelnotes)] <- "48";
+
+# include whether the vial was acid washed as a column
+df$acidwashed <- "NA"
+df$acidwashed[grep("(aw)", df$listdiffs)] <- "acidwashedvial"
+# does that mean that every vial after that date was also acid washed?  go back and check on this; mark it in the column if so.
 
 
-# some rows are repeats of the row above, so take the mean of those two rows
-# listdiffs, "same decription"
+########################################################################
+# SAVE CSV WET SEASON TO SORT BY HAND
+
+# save df for wet season as csv file
+write.csv(df, file=paste(pathsavefiles, "Soil-Data-RawFolders/Soil N Extractions/PreHandSorting-files/N-MINERAL-CHRISTINE-24-03-14-Use-by-hand.csv", sep = ""), row.names=FALSE)  
+
+# after looking at the data in excel, some problems still to be dealt with:
+# some rows are repeats of the row above them, so take the mean of those two rows
+# a bunch of the data is no good; delete those rows
+# handle this in the next section of code
+
+
+########################################################################
+# FIX WET SEASON DATA PROBLEMS THAT SHOULDN'T BE FIXES BY HAND
+
+# keep things as.character so you can use grep
+df$nitrppm <- as.character(df$nitrppm)
+df$ammppm <- as.character(df$ammppm)
+
+# "two samples, same description", then average that row with the row below it
+tmp <- grep("samples, same description", df$listdiffs) # avoid also picking df$listdiffs[348:352]
+for(i in 1:length(tmp)) {
+      # get info
+      ind <- tmp[i]
+      meannitr <- mean(as.numeric(df$nitrppm[ind:(ind+1)]), na.rm=TRUE)
+      meanamm <- mean(as.numeric(df$ammppm[ind:(ind+1)]), na.rm=TRUE)
+      # make a new row with the avgs
+      rowfill <- df[ind,]
+      rowfill$listdiffs <- "mean of two rows"
+      rowfill$nitrppm <- as.character(meannitr)
+      rowfill$ammppm <- as.character(meanamm)
+      # put row into df
+      df <- rbind(df,rowfill)
+}
+# get rid of rows that we just averaged
+gone <- c(tmp,tmp+1)
+df <- df[-gone,]
+
+# "insufficient sample" to NA concentration
+df$nitrppm[grep("Insufficient", df$nitrppm)] <- "NA"
+df$ammppm[grep("Insufficient", df$ammppm)] <- "NA"
+
+# remove "sample absent" rows
+df$nitrppm[grep("absent", df$nitrppm)] <- "NA"
+df$ammppm[grep("absent", df$ammppm)] <- "NA"
+
+# places where neither nitr or amm have a value, remove the row
+tmp <- grep("NA", df$nitrppm)
+tmp2 <- grep("NA", df$ammppm)
+tmp3 <- intersect(tmp,tmp2)
+df <- df[-tmp3,]
+
+
+
+########################################################################
+# SAVE CSV WET SEASON DATA TO USE
+
+#colnames(df)
+keep <- c("sampleID","nitrppm","ammppm","extinc","date","Site","LUtype","Chamber","test2448","acidwashed")
+df2 <- subset(df, select = keep )
+# switch to data.table
+dt <- data.table(df2)
+
+# save dt for wet season as csv file
+write.csv(dt, file=paste(pathsavefiles, "Soil-Data-Rprocessed/soilNwetseason.csv", sep = ""), row.names=FALSE)  
+
+
+# after looking at the data in excel, some problems still to be dealt with:
+# some rows are repeats of the row above them, so take the mean of those two rows
+# a bunch of the data is no good; delete those rows
+# handle this in the next section of code
+
+
+
+
 
 
 
@@ -146,116 +230,6 @@ df$Chamber[grep("bnk", df$sampleID)] <- "NA"
 
 
 
-
-
-
-
-# initialize data.table
-
-
-
-vialDFfull <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/GC-Data-Raw-R/GC-Data-Rprocessed/vialDFfull.csv", stringsAsFactors=FALSE)
-
-# make new column to ensure no repeats (easycallname = unique per chamber)
-vialDFfull$easycallname <- do.call(paste, c(vialDFfull[c("Site", "SampleDate", "Chamber")], sep = "_")) 
-
-#in case I want to see all the names outside of R environment
-#write.csv(vialDFfull, file=paste("vialDFfull_prac.csv", sep = ""), row.names=FALSE)  
-
-
-
-
-########################################################################
-# GET PIT DATA
-
-# Pits: m8, k4, c2 (forest); mu (mutun, soy)
-
-toMatch <- c("cm") #"M8", "K4", "MU", "C2" # C2 doesn't work because it goes with some side-by-side chamber trials
-pitgas <- subset(vialDFfull, grepl(paste(toMatch,collapse="|"), vialDFfull$SampleName))
-
-
-
-########################################################################
-# ELIMINATE UNACCEPTABLE DATA
-
-# no pressure vials
-nopressureid <- pitgas$Pressure=="N"
-NoPressureCount <- length(which(pitgas$Pressure=="N"))
-
-pitgas$ngN_cm3_N2O[nopressureid] <- NA
-pitgas$ngC_cm3_CO2[nopressureid] <- NA
-pitgas$ngC_cm3_CH4[nopressureid] <- NA
-
-pitgas$N2Oppm[nopressureid] <- NA
-pitgas$CO2ppm[nopressureid] <- NA
-pitgas$CH4ppm[nopressureid] <- NA
-
-# print info
-print(paste("VIAL PRESSURE INFO: there was/were ", NoPressureCount, " vial(s) with no pressure.", sep = ""))
-
-# some vials got repeated because of GC autosampler problems
-rerunid <- grep("Rerun_", pitgas$SampleName)
-
-pitgas$ngN_cm3_N2O[rerunid] <- NA
-pitgas$ngC_cm3_CO2[rerunid] <- NA
-pitgas$ngC_cm3_CH4[rerunid] <- NA
-
-pitgas$N2Oppm[rerunid] <- NA
-pitgas$CO2ppm[rerunid] <- NA
-pitgas$CH4ppm[rerunid] <- NA
-
-# any other vials that didn't seem to get sampled?
-nodata <- pitgas$N2Oraw<1.0
-
-pitgas$ngN_cm3_N2O[nodata] <- NA
-pitgas$ngC_cm3_CO2[nodata] <- NA
-pitgas$ngC_cm3_CH4[nodata] <- NA
-
-pitgas$N2Oppm[nodata] <- NA
-pitgas$CO2ppm[nodata] <- NA
-pitgas$CH4ppm[nodata] <- NA
-
-# recall that all three of these vials got rerun in the GC, so there is no data that is truly missing, only blank rows to be struck
-
-# some of the land use codes are "r" because of the rerun vials
-# site and LUtype have "re" and "r"
-Rid <- grep("R", pitgas$Site)
-
-samplenamesRe <- pitgas$SampleName[Rid]
-sitetmp <- substr(samplenamesRe, 7, 8)
-LUtmp <- substr(samplenamesRe, 7, 7)
-
-pitgas$Site[Rid] <- sitetmp
-pitgas$LUtype[Rid] <- LUtmp
-
-
-########################################################################
-# ADD USEFUL COLUMNS
-
-# pit ID
-pitgas$pitID <- -9999
-pitgas$pitID[grep("M8", pitgas$SampleName)] <- "M8"
-pitgas$pitID[grep("K4", pitgas$SampleName)] <- "K4"
-pitgas$pitID[grep("MU", pitgas$SampleName)] <- "MU"
-pitgas$pitID[grep("C2", pitgas$SampleName)] <- "C2"
-
-# depth
-pitgas$sampledepth <- -9999
-pitgas$sampledepth[grep("15cm", pitgas$SampleName)] <- 15
-pitgas$sampledepth[grep("40cm", pitgas$SampleName)] <- 40
-pitgas$sampledepth[grep("75cm", pitgas$SampleName)] <- 75
-pitgas$sampledepth[grep("150cm", pitgas$SampleName)] <- 150
-pitgas$sampledepth[grep("250cm", pitgas$SampleName)] <- 250
-pitgas$sampledepth[grep("350cm", pitgas$SampleName)] <- 350
-pitgas$sampledepth[grep("450cm", pitgas$SampleName)] <- 450
-
-
-########################################################################
-# SAVE CSV
-
-# save soilNfull as csv file
-soilNfull <- soilN
-write.csv(soilNfull, file=paste(pathsavefiles, "soilNfull.csv", sep = ""), row.names=FALSE)  
 
 
 
