@@ -45,12 +45,14 @@ fluxesfullmerge2 <- arrange(fluxesfullmerge,desc(SampleDate))
 #site
 fluxesfullmerge2$Site <- gsub("SM","S3", fluxesfullmerge2$Site, fixed=TRUE)
 fluxesfullmerge2$Site <- gsub("SD","S2", fluxesfullmerge2$Site, fixed=TRUE)
-# easysitename
-fluxesfullmerge2$easysitename <- gsub("SM_","S3_", fluxesfullmerge2$easysitename, fixed=TRUE)
-fluxesfullmerge2$easysitename <- gsub("SD_","S2_", fluxesfullmerge2$easysitename, fixed=TRUE)
 #fluxid
 fluxesfullmerge2$FluxID <- gsub("SM_","S3_", fluxesfullmerge2$FluxID, fixed=TRUE)
 fluxesfullmerge2$FluxID <- gsub("SD_","S2_", fluxesfullmerge2$FluxID, fixed=TRUE)
+
+# relabel S3 as an M land use, since it did in fact have corn in wet season 2014
+fluxesfullmerge2$LUtype[grep("S3", fluxesfullmerge2$Site)] <- "M"
+fluxesfullmerge2$Site <- gsub("S3","M4", fluxesfullmerge2$Site, fixed=TRUE)
+fluxesfullmerge2$FluxID <- gsub("S3_","M4_", fluxesfullmerge2$FluxID, fixed=TRUE)
 
 # add column for site-date combo name (to find site-date summary stats)
 fluxesfullmerge2$easysitename <- do.call(paste, c(fluxesfullmerge2[c("Site", "SampleDate")], sep = "_")) 
