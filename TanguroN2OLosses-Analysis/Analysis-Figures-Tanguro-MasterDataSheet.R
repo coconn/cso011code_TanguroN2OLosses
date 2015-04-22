@@ -57,6 +57,8 @@ sitedatesummary <- dtfluxes[,list(
 # include N, standard error and CI as per http://www.cookbook-r.com/Manipulating_data/Summarizing_data/
 
 
+
+
 ########################################################################
 # ABIOTIC FACTOR AND FLUXES VS. TIME PLOTS (each chamber)
 # gets saved as fluxes-factors-by-time-Nchambers.png
@@ -71,15 +73,15 @@ soilmois <- ggplot(fluxesfullmerge, aes(x=SampleDate2, y=SoilMoisPercent, color=
 soilmoisloess <- soilmois + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
 # N2O linear
-no2lin <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O")
+no2lin <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h")
 no2linloess <- no2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
 # CO2 Linear
-co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2")
+co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h")
 co2linloess <- co2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
 # CH4 Linear
-ch4lin <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CH4")
+ch4lin <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm2 / h")
 ch4linloess <- ch4lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
 }
@@ -105,11 +107,11 @@ dev.off()
 # soilmoisloess <- soilmois + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # 
 # # N2O linear
-# no2lin <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, nrow=3) + xlab("Sampling Date") + ylab("LinearFlux N2O")
+# no2lin <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, nrow=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h")
 # no2linloess <- no2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # 
 # # CO2 Linear
-# co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, nrow=3) + xlab("Sampling Date") + ylab("LinearFlux CO2")
+# co2lin <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SampleDate2, y=LinearFlux, color=color.use, group=1)) + geom_point(size=2.5) + facet_wrap( ~ LUname, nrow=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h")
 # co2linloess <- co2lin + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # 
 # # grid.arrange
@@ -139,11 +141,11 @@ dev.off()
 # no faceting
 soilmois <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) +
-  geom_point(size=2) + xlab("Sampling Date") + ylab("Soil Moisture Percent") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + xlab("Sampling Date") + ylab("% Soil Moisture") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # faceting
 soilmoisfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) +
-  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Soil Moisture Percent") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("% Soil Moisture") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # loess smooth included on facets
 soilmoisfacetloess <- soilmoisfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
@@ -151,11 +153,11 @@ soilmoisfacetloess <- soilmoisfacet + geom_smooth(size = 1.5, fill="#333333", co
 # no faceting
 n2olin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
-  geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # faceting
 n2olinfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) +
-  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # loess smooth included on facets
 n2olinfacetloess <- n2olinfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
@@ -163,11 +165,11 @@ n2olinfacetloess <- n2olinfacet + geom_smooth(size = 1.5, fill="#333333", colour
 # no faceting
 co2lin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) +
-  geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux CO2") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # faceting
 co2linfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, colour=color.use)) + 
   geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) +
-  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+  geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # loess smooth included on facets
 co2linfacetloess <- co2linfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
@@ -175,11 +177,11 @@ co2linfacetloess <- co2linfacet + geom_smooth(size = 1.5, fill="#333333", colour
 # no faceting
 ch4lin <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, colour=color.use)) + 
       geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) +
-      geom_point(size=2) + xlab("Sampling Date") + ylab("LinearFlux CH4") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
+      geom_point(size=2) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm2 / h") + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 # faceting
 ch4linfacet <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, colour=color.use)) + 
       geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) +
-      geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CH4") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
+      geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm2 / h") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 # loess smooth included on facets
 ch4linfacetloess <- ch4linfacet + geom_smooth(size = 1.5, fill="#333333", colour="black") + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 }
@@ -195,32 +197,45 @@ dev.off()
 }
 
 
+# versions with shared legend
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/grid_arrange_shared_legend.r")
+{
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
+# grid.arrange and save
+png(file = paste(pathsavefigures, "fluxes-factors-by-time-sitedate-facet-noloess_legend.png", sep=""),width=16,height=14,units="in",res=400)
+grid_arrange_shared_legend(soilmoisfacet, n2olinfacet, co2linfacet, ch4linfacet, nrow = 4, ncol = 1)
+dev.off()
+}
+
+
+
+
 ########################################################################
 # ABIOTIC FACTOR VS. FLUX SCATTER PLOTS - NOTHING FANCY
 
 # a bunch of flux by factor scatter plots
 {
-scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux N2O: ngN / cm2 / h") + xlab("% Soil Moisture") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter1b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CO2") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines
+scatter1b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux CO2: ugC / cm2 / h") + xlab("% Soil Moisture") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter1c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CH4") + xlab("SoilMoisPercent") + geom_smooth(method=lm,   # Add linear regression lines                                                                                                                                                                                                                                         
+scatter1c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilMoisPercent, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux CH4: ugC / cm2 / h") + xlab("% Soil Moisture") + geom_smooth(method=lm,   # Add linear regression lines                                                                                                                                                                                                                                         
       se=TRUE,    # Do or don't add shaded confidence region                                                                                
       fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux N2O") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2a <- ggplot(subset(fluxesfullmerge,GasType=="N2O"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux N2O: ngN / cm2 / h") + xlab("Soil Tmp C") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CO2") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2b <- ggplot(subset(fluxesfullmerge,GasType=="CO2"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux CO2: ugC / cm2 / h") + xlab("Soil Tmp C") + geom_smooth(method=lm,   # Add linear regression lines
               se=TRUE,    # Do or don't add shaded confidence region
               fullrange=T) # Extend regression lines beyond the domain of the data
 
-scatter2c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("LinearFlux CH4") + xlab("Soil Tmp") + geom_smooth(method=lm,   # Add linear regression lines
+scatter2c <- ggplot(subset(fluxesfullmerge,GasType=="CH4"), aes(x=SoilTmpEnd, y=LinearFlux, color=color.use)) + geom_point(shape=1) + theme(legend.position="none") + ylab("Flux CH4: ugC / cm2 / h") + xlab("Soil Tmp C") + geom_smooth(method=lm,   # Add linear regression lines
             se=TRUE,    # Do or don't add shaded confidence region
             fullrange=T) # Extend regression lines beyond the domain of the data
 }
@@ -238,12 +253,10 @@ dev.off()
 ########################################################################
 # SITE PATTERNS
 
-##### up next - include row and interrow as a different shape on these
-
 # N2O flux pattern for each site
 {
 # ggplot
-sitetrackingN2O <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux N2O") + geom_line() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+sitetrackingN2O <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h") + geom_line() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure
@@ -253,17 +266,27 @@ ggsave(file=paste(pathsavefigures, "sitetrackingN2O.png", sep=""),width=5,height
 # CO2 flux pattern for each site
 {
 # ggplot
-sitetrackingCO2 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("LinearFlux CO2") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+sitetrackingCO2 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure
 ggsave(file=paste(pathsavefigures, "sitetrackingCO2.png", sep=""),width=5,height=5,units="in",dpi=400)
 }
 
+# CH4 flux pattern for each site
+{
+# ggplot
+sitetrackingCH4 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm2 / h") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+# where to save figure
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
+# save figure
+ggsave(file=paste(pathsavefigures, "sitetrackingCH4.png", sep=""),width=5,height=5,units="in",dpi=400)
+}
+
 # Moisture patterns for each site
 {
 # ggplot
-sitetrackingmois <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, color=color.use)) + geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Soil Moisture Percent") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+sitetrackingmois <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanSoilMoisPercent, color=color.use)) + geom_errorbar(aes(ymin=meanSoilMoisPercent-sdSoilMoisPercent, ymax=meanSoilMoisPercent+sdSoilMoisPercent), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("% Soil Moisture") + geom_line() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # where to save figure
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
 # save figure
@@ -271,6 +294,65 @@ ggsave(file=paste(pathsavefigures, "sitetrackingmois.png", sep=""),width=5,heigh
 }
 
 
+
+########################################################################
+# ROW VS. INTERROW PATTERNS WITH SOIL MOISTURE
+
+# see "ABIOTIC FACTOR VS. FLUX SCATTER PLOTS - NOTHING FANCY" section above for similar plots
+
+# need this otherwise because forest isn't represented here, the colors are all off by one
+factorcolors <- c("#619CFF","#F8766D") # c("blue","orange")
+
+scatter1aRI <- ggplot(subset(fluxesfullmerge,GasType=="N2O" & (RowInter=="R" | RowInter=="I")), aes(x=SoilMoisPercent, y=LinearFlux, color=LUtype)) + geom_point(shape=1) + facet_wrap( ~ RowInter, ncol=2) + ylab("Flux N2O: ngN / cm2 / h") + scale_colour_manual(values = factorcolors) + xlab("% Soil Moisture") + geom_smooth(method=lm, se=TRUE, fullrange=T) + theme(legend.position="none") # Extend regression lines beyond the domain of the data
+
+scatter1bRI <- ggplot(subset(fluxesfullmerge,GasType=="CO2" & (RowInter=="R" | RowInter=="I")), aes(x=SoilMoisPercent, y=LinearFlux, color=LUtype)) + geom_point(shape=1) + facet_wrap( ~ RowInter, ncol=2) + ylab("Flux CO2: ugC / cm2 / h") + scale_colour_manual(values = factorcolors) + xlab("% Soil Moisture") + geom_smooth(method=lm, se=TRUE, fullrange=T) + theme(legend.position="none") # Extend regression lines beyond the domain of the data
+
+scatter1cRI <- ggplot(subset(fluxesfullmerge,GasType=="CH4" & (RowInter=="R" | RowInter=="I")), aes(x=SoilMoisPercent, y=LinearFlux, color=LUtype)) + geom_point(shape=1) + facet_wrap( ~ RowInter, ncol=2) + ylab("Flux CH4: ugC / cm2 / h") + scale_colour_manual(values = factorcolors) + xlab("% Soil Moisture") + geom_smooth(method=lm, se=TRUE, fullrange=T) + theme(legend.position="none") # Extend regression lines beyond the domain of the data
+
+
+# where to save figure
+{
+      pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
+      # grid.arrange and save
+      png(file = paste(pathsavefigures, "flux-rowinter-factors-scatterplots.png", sep=""),width=20,height=6,units="in",res=400)
+      grid.arrange(scatter1aRI, scatter1bRI, scatter1cRI, nrow = 1, ncol = 3)
+      dev.off()
+}
+
+
+########################################################################
+# ROW VS. INTERROW MEAN FLUX BAR GRAPHS
+
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
+
+rowintersummary <- summarySE(data=fluxesfullmerge, measurevar="LinearFlux", groupvars=c("GasType","LUtype","RowInter"), na.rm=TRUE)
+
+# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+pattern <- "R|I|F"
+tmp <- grep(pattern, rowintersummary$RowInter)
+rowintersummary <- rowintersummary[tmp,]
+# weird row where gas == NA
+ok <- complete.cases(rowintersummary$GasType)
+rowintersummary <- rowintersummary[ok,]
+
+# bar graphs
+
+factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+
+barplotaRI <- ggplot(data=subset(rowintersummary,GasType=="N2O"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="N2O")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux N2O: ngN / cm2 / h") + xlab("Land Use Type") + theme(legend.position="none")
+
+barplotbRI <- ggplot(data=subset(rowintersummary,GasType=="CO2"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CO2")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CO2: ugC / cm2 / h") + xlab("Land Use Type") + theme(legend.position="none")
+
+barplotcRI <- ggplot(data=subset(rowintersummary,GasType=="CH4"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymin=LinearFlux-sd, ymax=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CH4")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CH4: ugC / cm2 / h") + xlab("Land Use Type") 
+
+# where to save figure
+{
+pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet/"
+# grid.arrange and save
+png(file = paste(pathsavefigures, "flux-rowinter-factors-barplots.png", sep=""),width=20,height=6,units="in",res=400)
+grid.arrange(barplotaRI, barplotbRI, barplotcRI, nrow = 1, ncol = 3)
+dev.off()
+}
 
 
 ########################################################################

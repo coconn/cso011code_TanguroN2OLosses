@@ -48,7 +48,7 @@ dev.off()
 
 
 ########################################################################
-# DATA QUALITY: CO2, N2O AND CH4 CORRELATION
+# DATA QUALITY: CO2, N2O AND CH4 QUALITY CORRELATION
 
 # correlation matrix
 corrdf <- data.frame(LinearR2_CO2,LinearR2_N2O,LinearR2_CH4,QuadR2_CO2,QuadR2_N2O,QuadR2_CH4)
@@ -74,6 +74,16 @@ pairs.panels(corrdf, smooth=TRUE, scale=FALSE,main="Fluxes R^2 Correlations")
 # res1 <- cor.mtest(corrdf, 0.95); res2 <- cor.mtest(corrdf, 0.99);corrplot(z, p.mat = res1[[1]], insig = "p-value", method = "ellipse", sig.level = -1) # add all p-values
 
 dev.off()
+
+
+
+########################################################################
+# DETERMINE CO2 R^2 CUTOFF
+
+
+
+
+
 
 
 
