@@ -10,6 +10,8 @@
 # TO DO
 # panel fluxes by time - each site (incl. row and interrow)
 
+# UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 fluxes are in migrograms/cm2/h, N2O are in nanograms/cm2/h.
+
 
 
 ########################################################################
