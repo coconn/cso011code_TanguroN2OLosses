@@ -94,6 +94,9 @@ chambersoilN <- extractiondata[-tmp3,keepcols]
 
 # fill in DateIncubLabBegin, IncubationDays
 
+##### FAKE FOR NOW
+chambersoilN$DateIncubLabBegin <- chambersoilN$DateLabBegin
+chambersoilN$IncubationDays <- 7
 
 # fill in bulk density values per site
 
