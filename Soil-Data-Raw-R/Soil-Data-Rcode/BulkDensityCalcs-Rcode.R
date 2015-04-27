@@ -3,11 +3,12 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
-# requires files created in XXXXX place
+# requires files combined by hand in Soil-Data-Raw-R/Soil-Data-RawFolders/Bulk Density
 # takes soil dry weight data from Tanguro and calculates bulk density for each of Christine's N2O sites
 
 # output products:
-# XXXXX.csv : something
+# soilbulkdensity_processed.csv : bulk density summary CSV
+# BDmethodcomparison.png: compares the results from the truth bar method (july 2013) with the bulk density ring method (nov 2014)
 
 
 
@@ -25,6 +26,7 @@ library(xlsx)
 library(reshape)
 library(tidyr)
 library(stringi)
+library(Hmisc)
 
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-Rprocessed/"
@@ -32,227 +34,51 @@ pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/
 
 
 ########################################################################
-# TANGURO EXTRACTION LOG COMBO FILE: BRING IN DATA
+# TANGURO BULK DENSITY COMBO FILE: BRING IN DATA
 
-dftmp <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/Field-Extraction-Log/NCD-extractionlog-MASTER-COMBO.csv", stringsAsFactors=FALSE)
-
-# get rid of blank rows
-df <- dftmp[!(dftmp$Site == ""), ]
-
-
-
-
-
+df <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/Bulk Density/NCD-bulkdensity-combined-data.csv", stringsAsFactors=FALSE)
 
 
 ########################################################################
-# SAVE CSV WET SEASON DATA TO USE
+# SUMMARY INFO
 
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
 
-# save dt for wet season as csv file
-write.csv(dt, file=paste(pathsavefiles, "tanguroextractionlog.csv", sep = ""), row.names=FALSE)  
+BDsummary <- summarySE(data=df, measurevar="BulkDensity_gcm3", groupvars=c("Site","SampleMonth","SampleType"), na.rm=TRUE)
 
+# weighted mean info to combine the two BD measurement methods
+tmp <- ddply(BDsummary, c("Site"), summarise, 
+      wmn = wtd.mean(BulkDensity_gcm3, N),
+      wv = wtd.var(BulkDensity_gcm3, N),
+      wsd = sqrt(wv),
+      mn = mean(BulkDensity_gcm3))
+tmp$SampleMonth <- "combo"
+tmp$SampleType <- "combo"
 
-
-
-
-########################################################################
-# WET SEASON 2014: BRING IN DATA
-
-# filesnames[1], filesnames[5], and filesnames[4] go together
-
-# filenames[1] = "AMMONIUN CHRISTINE.xls"
-# ammonium concentrations, no column with CSO label info
-# many sheets, where each sheet is a samples run on a different date
-# collated into a single sheet by hand, 3-31-2015
-runsheet <- read.xlsx(paste(soildatafolder,filenames[1],sep=""),"CSOcombinedbyhand")
-runsheet <- as.data.frame(runsheet, stringsAsFactors=FALSE)
-# fix weird excel date thing
-runsheet$Date <- as.character(runsheet$Date)
-runsheet$Date[runsheet$Date=="42039"] <- "04-02-2015"; runsheet$Date[runsheet$Date=="42037"] <- "02-02-2015"
-runsheetAmm2014 <- runsheet
-
-# filenames[5] = "NITRATE CHRISTINE.xls"
-# nitrate concentrations, no column with CSO label info
-# many sheets, where each sheet is a samples run on a different date
-# collated into a single sheet by hand, 3-31-2015
-runsheet <- read.xlsx2(paste(soildatafolder,filenames[5],sep=""),"CSOcombinedbyhand")
-runsheet <- as.data.frame(runsheet, stringsAsFactors=FALSE)
-# fix weird excel date thing
-runsheet$Date <- as.character(runsheet$Date)
-runsheet$Date[runsheet$Date=="42126"] <- "05-02-2015"; runsheet$Date[runsheet$Date=="42157"] <- "06-02-2015"; runsheet$Date[runsheet$Date=="42279"] <- "10-02-2015"; runsheet$Date[runsheet$Date=="42340"] <- "12-02-2015"
-runsheetNitr2014 <- runsheet
-
-# filenames[4] = "N MINERAL CHRISTINE 24-03-14.xls"
-# two sheets, both are kind of a mess
-runsheet <- read.xlsx(paste(soildatafolder,filenames[4],sep=""),2, colClasses="character")
-
-# do these three files have the same data within?
-tmp1 <- as.character(runsheet[8:19,6])
-tmp2 <- as.character(runsheetAmm2014[4:15,2])
-identical(tmp1,tmp2) #ammonium checks out
-tmp1 <- as.character(runsheet[14:23,5])
-tmp2 <- as.character(round(as.numeric(as.character(runsheetNitr2014[9:18,2])),digits=5))
-identical(tmp1,tmp2) #nitrate checks out
-
-# so, keep filenames[4]
-df <- runsheet; rm(runsheetAmm2014, runsheetNitr2014,runsheet)
-
-# make df the right dimensions
-df <- df[6:573,1:7]
-colnames(df) = c("num","sampleID","capnotes","labelnotes","listdiffs","nitrppm","ammppm")
-head(df)
+# put into one df
+BDsummary2 <- rbind.fill(BDsummary,tmp) # allows the dfs to have different columns (fills in needed NAs)
+# columns that IDs which BD measurement and uncertainty to use
+BDsummary2 <- transform(BDsummary2, BulkDensity_gcm3_use = ifelse(SampleMonth=="combo", wmn, BulkDensity_gcm3))
+BDsummary2 <- transform(BDsummary2, BulkDensity_gcm3_uncertainty_use = ifelse(SampleMonth=="combo", wsd, sd))
 
 
 ########################################################################
-# WET SEASON 2014: CLEAN UP DATA
+# HOW WELL DO THE METHODS COMPARE?
 
-# make sure that no sites are still labeled SD or SM
-df$sampleID <- gsub("SM","S3", df$sampleID, fixed=TRUE)
-df$sampleID <- gsub("SD","S2", df$sampleID, fixed=TRUE)
+# reorder the bars so they are chronological and then weighted mean
+BDsummary2$SampleType2 <- factor(BDsummary2$SampleType, levels=c("Truth bar hole", "BD ring", "combo")) # reprints as factors with levels
 
-# put info from sampleID into several columns
-
-# extraction or incubation
-df$extinc <- -9999
-df$extinc[grep("ext", df$sampleID)] <- "ext"; df$extinc[grep("inc", df$sampleID)] <- "inc"; df$extinc[grep("bnk", df$sampleID)] <- "bnk"
-
-# date
-df$sampleID <- as.character(df$sampleID)
-df$datestr <- stri_sub(df$sampleID,-8,-1)
-df$date <- dmy(df$datestr) 
-
-# site
-df$Site <- -9999
-df$Site[grep("F1", df$sampleID)] <- "F1"; df$Site[grep("F2", df$sampleID)] <- "F2"; df$Site[grep("F3", df$sampleID)] <- "F3"
-df$Site[grep("M1", df$sampleID)] <- "M1"; df$Site[grep("M2", df$sampleID)] <- "M2"; df$Site[grep("M3", df$sampleID)] <- "M3"
-df$Site[grep("S1", df$sampleID)] <- "S1"; df$Site[grep("S2", df$sampleID)] <- "S2"; df$Site[grep("S3", df$sampleID)] <- "S3"
-df$Site[grep("bnk", df$sampleID)] <- "NA"
-
-# land use
-df$LUtype <- -9999
-df$LUtype[grep("M", df$sampleID)] <- "M"; df$LUtype[grep("F", df$sampleID)] <- "F"; df$LUtype[grep("S", df$sampleID)] <- "S"
-df$LUtype[grep("bnk", df$sampleID)] <- "NA"
-
-# chamber
-df$Chamber <- -9999
-df$Chamber[grep("A_", df$sampleID)] <- "A"; df$Chamber[grep("B_", df$sampleID)] <- "B"; df$Chamber[grep("C_", df$sampleID)] <- "C"; df$Chamber[grep("D_", df$sampleID)] <- "D"; df$Chamber[grep("E_", df$sampleID)] <- "E"
-df$Chamber[grep("bnk", df$sampleID)] <- "NA"
-
-# other useful info columns
-
-# include the 24 hr vs. 48 test as a column
-df$test2448 <- "NA"
-df$test2448[grep("24", df$labelnotes)] <- "24"; df$test2448[grep("48", df$labelnotes)] <- "48";
-
-# include whether the vial was acid washed as a column
-df$acidwashed <- "NA"
-df$acidwashed[grep("(aw)", df$listdiffs)] <- "acidwashedvial"
-# does that mean that every vial after that date was also acid washed?  go back and check on this; mark it in the column if so.
+png(file = paste(pathsavefiles, "BDmethodcomparison.png", sep=""),width=8,height=6,units="in",res=400)
+# barplot
+ggplot(data=BDsummary2, aes(x=Site, y=BulkDensity_gcm3_use, group=SampleType2,fill=SampleType2)) + geom_bar(position='dodge', stat='identity') + geom_errorbar(aes(ymax=BulkDensity_gcm3_use+BulkDensity_gcm3_uncertainty_use, ymin=BulkDensity_gcm3_use-BulkDensity_gcm3_uncertainty_use), position=position_dodge(0.9),width=.25, data=BDsummary2) + ylab("Bulk Density, g/cm^3") + scale_fill_discrete(name="Sample Method\nAnd Month", breaks=c("Truth bar hole", "BD ring", "combo"), labels=c("Truth Bar Method, \nJuly 2013", "BD Ring Method, \nNov. 2014", "Weighted Mean of \nRing/Bar Methods")) + theme(legend.position="bottom")
+dev.off()
 
 
 ########################################################################
-# SAVE CSV WET SEASON TO SORT BY HAND
+# SAVE CSV BULK DENSITY SUMMARY TO USE
 
-# save df for wet season as csv file
-write.csv(df, file=paste(pathsavefiles, "Soil-Data-RawFolders/Soil N Extractions/PreHandSorting-files/N-MINERAL-CHRISTINE-24-03-14-Use-by-hand.csv", sep = ""), row.names=FALSE)  
-
-# after looking at the data in excel, some problems still to be dealt with:
-# some rows are repeats of the row above them, so take the mean of those two rows
-# a bunch of the data is no good; delete those rows
-# handle this in the next section of code
-
-
-########################################################################
-# FIX WET SEASON DATA PROBLEMS THAT SHOULDN'T BE FIXES BY HAND
-
-# keep things as.character so you can use grep
-df$nitrppm <- as.character(df$nitrppm)
-df$ammppm <- as.character(df$ammppm)
-
-# "two samples, same description", then average that row with the row below it
-tmp <- grep("samples, same description", df$listdiffs) # avoid also picking df$listdiffs[348:352]
-for(i in 1:length(tmp)) {
-      # get info
-      ind <- tmp[i]
-      meannitr <- mean(as.numeric(df$nitrppm[ind:(ind+1)]), na.rm=TRUE)
-      meanamm <- mean(as.numeric(df$ammppm[ind:(ind+1)]), na.rm=TRUE)
-      # make a new row with the avgs
-      rowfill <- df[ind,]
-      rowfill$listdiffs <- "mean of two rows"
-      rowfill$nitrppm <- as.character(meannitr)
-      rowfill$ammppm <- as.character(meanamm)
-      # put row into df
-      df <- rbind(df,rowfill)
-}
-# get rid of rows that we just averaged
-gone <- c(tmp,tmp+1)
-df <- df[-gone,]
-
-# "insufficient sample" to NA concentration
-df$nitrppm[grep("Insufficient", df$nitrppm)] <- "NA"
-df$ammppm[grep("Insufficient", df$ammppm)] <- "NA"
-
-# remove "sample absent" rows
-df$nitrppm[grep("absent", df$nitrppm)] <- "NA"
-df$ammppm[grep("absent", df$ammppm)] <- "NA"
-
-# places where neither nitr or amm have a value, remove the row
-tmp <- grep("NA", df$nitrppm)
-tmp2 <- grep("NA", df$ammppm)
-tmp3 <- intersect(tmp,tmp2)
-df <- df[-tmp3,]
-
-
-
-########################################################################
-# SAVE CSV WET SEASON DATA TO USE
-
-#colnames(df)
-keep <- c("sampleID","nitrppm","ammppm","extinc","date","Site","LUtype","Chamber","test2448","acidwashed")
-df2 <- subset(df, select = keep )
-# switch to data.table
-dt <- data.table(df2)
-
-# save dt for wet season as csv file
-write.csv(dt, file=paste(pathsavefiles, "Soil-Data-Rprocessed/soilNwetseason.csv", sep = ""), row.names=FALSE)  
-
-
-# after looking at the data in excel, some problems still to be dealt with:
-# some rows are repeats of the row above them, so take the mean of those two rows
-# a bunch of the data is no good; delete those rows
-# handle this in the next section of code
-
-
-
-
-
-
-
-########################################################################
-# DRY SEASON 2013: BRING IN DATA
-
-#DEAL WITH LATER
-
-# # filenames[3] = "Christine O Connell NITRATO corrigido.xls"
-# # one sheet with "corrected" nitrate and the other with the raw data (including standards)
-# runsheet <- read.xlsx(paste(soildatafolder,filenames[3],sep=""),1)
-# 
-# # filenames[2] = "AMOSTRAS CHRISTINE 2013 ENCONTRADAS.xlsx"
-# # ammonium and nitrate concentrations, includes CSO label info
-# # only one sheet, given nicer column names by hand, 3-31-2015
-# # no included lab dates
-# runsheet <- read.xlsx(paste(soildatafolder,filenames[2],sep=""),"CSOcombinedbyhand")
-# runsheet <- as.data.frame(runsheet, stringsAsFactors=FALSE)
-# runsheet$DESCRIÇÃO <- as.character(runsheet$DESCRIÇÃO)
-# runsheet2 <- runsheet
-
-
-
-
-
-
-
+# save df as csv file
+write.csv(BDsummary2, file=paste(pathsavefiles, "soilbulkdensity_processed.csv", sep = ""), row.names=FALSE)  
 
 
 
