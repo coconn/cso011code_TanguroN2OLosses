@@ -1,13 +1,13 @@
-# Soil-Data-Cleaning-PreHandSorting-Rcode.R
+# Soil-Data-InorgN-Cleaning-Rcode.R
 # taking soil data from Tanguro trace gas project that I received directly from CENA
-# parsing the data so it's manageable by hand
-# some excel cleaning was done by hand after this step (hence "PreHandSorting")
+# parsing the data so it's manageable and has appropriate columns
+# right now this is only CENA, wet season data
 #
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
 # output products:
-# soilNfull.csv : master csv of nitrogen extraction data
+# soilNwetseason.csv : master csv of nitrogen extraction data for CENA wet season
 
 
 ########################################################################
@@ -35,7 +35,7 @@ filenames <- list.files(soildatafolder, pattern="*.xls*")
 
 
 ########################################################################
-# WET SEASON 2014: BRING IN DATA
+# WET SEASON 2014, CENA RESULTS: BRING IN DATA
 
 # filesnames[1], filesnames[5], and filesnames[4] go together
 
@@ -83,7 +83,7 @@ head(df)
 
 
 ########################################################################
-# WET SEASON 2014: CLEAN UP DATA
+# WET SEASON 2014, CENA RESULTS: CLEAN UP DATA
 
 # make sure that no sites are still labeled SD or SM
 df$sampleID <- gsub("SM","S3", df$sampleID, fixed=TRUE)
@@ -128,12 +128,15 @@ df$acidwashed <- "NA"
 df$acidwashed[grep("(aw)", df$listdiffs)] <- "acidwashedvial"
 # does that mean that every vial after that date was also acid washed?  go back and check on this; mark it in the column if so.
 
+# that this data is from CENA
+df$lab <- "CENA"
+
 
 ########################################################################
-# SAVE CSV WET SEASON TO SORT BY HAND
+# SAVE CSV WET SEASON CENA RESULTS
 
 # save df for wet season as csv file
-write.csv(df, file=paste(pathsavefiles, "Soil-Data-RawFolders/Soil N Extractions/PreHandSorting-files/N-MINERAL-CHRISTINE-24-03-14-Use-by-hand.csv", sep = ""), row.names=FALSE)  
+# write.csv(df, file=paste(pathsavefiles, "Soil-Data-RawFolders/Soil N Extractions/PreHandSorting-files/N-MINERAL-CHRISTINE-24-03-14-Use-by-hand.csv", sep = ""), row.names=FALSE)  
 
 # after looking at the data in excel, some problems still to be dealt with:
 # some rows are repeats of the row above them, so take the mean of those two rows
@@ -142,7 +145,7 @@ write.csv(df, file=paste(pathsavefiles, "Soil-Data-RawFolders/Soil N Extractions
 
 
 ########################################################################
-# FIX WET SEASON DATA PROBLEMS THAT SHOULDN'T BE FIXES BY HAND
+# FIX WET SEASON CENA DATA PROBLEMS THAT SHOULDN'T BE FIXES BY HAND
 
 # keep things as.character so you can use grep
 df$nitrppm <- as.character(df$nitrppm)
@@ -182,27 +185,78 @@ tmp3 <- intersect(tmp,tmp2)
 df <- df[-tmp3,]
 
 
+########################################################################
+# WET SEASON 2014, MBL RESULTS: BRING IN DATA
+
+soildatafolder2 = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/Soil N Extractions/MBL Data/"
+dfmbl <- read.xlsx(paste(soildatafolder2,"OConnellSamples.xlsx",sep=""),"Sheet1")
+# take out final row
+dfmbl <- dfmbl[1:50,]
+
+# get the columns right for this
+
+# extraction or incubation
+dfmbl$extinc <- -9999
+dfmbl$extinc[grep("EXT", dfmbl$Inc.or.Ext.)] <- "ext"; dfmbl$extinc[grep("INC", dfmbl$Inc.or.Ext.)] <- "inc"; dfmbl$extinc[grep("Blank|Bnk", dfmbl$Site.chamber)] <- "bnk"
+
+# make sure that no sites are still labeled SD or SM
+dfmbl$Site.chamber <- gsub("SM","S3", dfmbl$Site.chamber, fixed=TRUE)
+dfmbl$Site.chamber <- gsub("SD","S2", dfmbl$Site.chamber, fixed=TRUE)
+
+# site
+dfmbl$Site <- -9999
+dfmbl$Site[grep("F1", dfmbl$Site.chamber)] <- "F1"; dfmbl$Site[grep("F2", dfmbl$Site.chamber)] <- "F2"; dfmbl$Site[grep("F3", dfmbl$Site.chamber)] <- "F3"
+dfmbl$Site[grep("M1", dfmbl$Site.chamber)] <- "M1"; dfmbl$Site[grep("M2", dfmbl$Site.chamber)] <- "M2"; dfmbl$Site[grep("M3", dfmbl$Site.chamber)] <- "M3"
+dfmbl$Site[grep("S1", dfmbl$Site.chamber)] <- "S1"; dfmbl$Site[grep("S2", dfmbl$Site.chamber)] <- "S2"; dfmbl$Site[grep("S3", dfmbl$Site.chamber)] <- "S3"
+dfmbl$Site[grep("Blank|Bnk", dfmbl$Site.chamber)] <- "NA"
+
+# land use
+dfmbl$LUtype <- -9999
+dfmbl$LUtype[grep("M", dfmbl$Site.chamber)] <- "M"; dfmbl$LUtype[grep("F", dfmbl$Site.chamber)] <- "F"; dfmbl$LUtype[grep("S", dfmbl$Site.chamber)] <- "S"
+dfmbl$LUtype[grep("Blank|Bnk", dfmbl$Site.chamber)] <- "NA"
+
+# chamber
+dfmbl$Chamber <- -9999
+dfmbl$Chamber[grep("A", dfmbl$Site.chamber)] <- "A"; dfmbl$Chamber[grep("B", dfmbl$Site.chamber)] <- "B"; dfmbl$Chamber[grep("C", dfmbl$Site.chamber)] <- "C"; dfmbl$Chamber[grep("D", dfmbl$Site.chamber)] <- "D"; dfmbl$Chamber[grep("E", dfmbl$Site.chamber)] <- "E"
+dfmbl$Chamber[grep("Blank|Bnk", dfmbl$Site.chamber)] <- "NA"
+
+# date
+dfmbl$date <- dfmbl$DateA
+
+# include the 24 hr vs. 48 test as a column
+dfmbl$test2448 <- "NA"
+dfmbl$test2448[grep("24", dfmbl$aw24)] <- "24"; dfmbl$test2448[grep("48", dfmbl$aw24)] <- "48";
+
+# include whether the vial was acid washed as a column
+dfmbl$acidwashed <- "NA"
+dfmbl$acidwashed[grep("AW", dfmbl$aw24)] <- "acidwashedvial"
+# does that mean that every vial after that date was also acid washed?  go back and check on this; mark it in the column if so.
+
+# that this data is from MBL
+dfmbl$lab <- "MBL"
+
+# smaller df
+keep1 <- c("NO3.mg.L.","NH4.mg.L.","extinc","date","Site","LUtype","Chamber","test2448","acidwashed","lab")
+dfmbl2 <- subset(dfmbl, select = keep1)
+
 
 ########################################################################
-# SAVE CSV WET SEASON DATA TO USE
+# MERGE MBL AND CENA DATA
+
+totaldf <- rbind.fill(df, dfmbl2) # rfom plyr
+
+
+########################################################################
+# SAVE CSV TO USE
 
 #colnames(df)
-keep <- c("sampleID","nitrppm","ammppm","extinc","date","Site","LUtype","Chamber","test2448","acidwashed")
-df2 <- subset(df, select = keep )
+keep <- c("sampleID","nitrppm","ammppm","extinc","date","Site","LUtype","Chamber","test2448","acidwashed","lab", "NO3.mg.L.", "NH4.mg.L.")
+df2 <- subset(totaldf, select = keep )
 # switch to data.table
 dt <- data.table(df2)
 
 # save dt for wet season as csv file
 write.csv(dt, file=paste(pathsavefiles, "Soil-Data-Rprocessed/soilNwetseason.csv", sep = ""), row.names=FALSE)  
-
-
-# after looking at the data in excel, some problems still to be dealt with:
-# some rows are repeats of the row above them, so take the mean of those two rows
-# a bunch of the data is no good; delete those rows
-# handle this in the next section of code
-
-
-
 
 
 
