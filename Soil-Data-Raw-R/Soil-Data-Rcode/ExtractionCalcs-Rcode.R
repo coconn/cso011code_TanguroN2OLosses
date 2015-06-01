@@ -2,29 +2,111 @@
 # taking vial data and converting it into fluxes
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
-
-# requires files created in XXXXX place
-# takes soil extraction data from CENA/MBL and calculates [NO3], [NH4], [NO3+NH4], net N min, net N nitr, net immobilization (per gram basis and per area basis)
-
+#
+# bring in extractionlogcsv.csv 
+# (which was compiled by hand based on soilNlabresults.csv, created in Process-soilNlabresults-Cleaning-Rcode.R)
+# 
+# take that soil N extraction data and calculate:
+# [NO3], [NH4], [NO3+NH4]
+# net N min, net N nitr, net immobilization (per gram basis and per area basis)
+#
+# see Process-soilNlabresults-Cleaning-Rcode.R, BulkDensityCalcs-Rcode.R
+#
 # output products:
 # soilextractiondata_processed.csv: reports NO3 and NH4 as mg N/g soil and not ppm
-# chambersoilNmaster.csv
+# 
 
 
 
 ########################################################################
 # BRING IN DATA, ETC.
 
-extractiondata <- read.csv("~/Downloads/ncd-calc-vals-practiceR.csv", stringsAsFactors=FALSE)
-
 library(data.table)
 library(ggplot2)
 library(gridExtra)
 library(plyr)
 library(reshape)
+library(lubridate)
+
+# path
+pathbringin = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/"
+
+labdata <- read.csv(paste(pathbringin, "Soil-Data-Rprocessed/soilNlabresults.csv", sep = ""), stringsAsFactors=FALSE)
+extractiondata <- read.csv(paste(pathbringin, "Soil-Data-RawFolders/Field-Extraction-Log/ExtractionLogCompiled/extractionlogcsv.csv", sep = ""), stringsAsFactors=FALSE)
 
 # where to save outputs
 pathsavefiles = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-Rprocessed/"
+
+
+
+########################################################################
+# COMBINE THESE DATA FRAMES
+
+
+
+
+########################################################################
+# COMBINE THESE DATA FRAMES
+
+
+
+
+
+
+
+
+
+# ??????? how to best do this?????
+# extinc, DateLab1, Site, Chamber <- these give you the unique extraction vial
+
+# get dates to be the same
+extractiondata$dateformerge <- extractiondata$DateLab1
+extractiondata$dateformerge <- mdy(extractiondata$dateformerge)
+extractiondata$date <- NULL
+labdata$dateformerge <- labdata$date
+labdata$date <- NULL
+
+# get rid of hours
+labdata$dateformerge <- as.Date(labdata$dateformerge)
+extractiondata$dateformerge <- as.Date(extractiondata$dateformerge)
+
+# then merge
+dfN <- merge(extractiondata, labdata, all=T)
+#test2 <- subset(test, lab == "CENA" | lab == "MBL")
+
+# now go and deal with this by hand
+write.csv(dfN, file=paste(pathsavefiles, "soilextractionresultsmiddlestep.csv", sep = ""), row.names=FALSE)  
+
+
+# then get a unique list of dateformerge and loop within them
+# including parsing by site and MBL vs. CENA
+datestoprocess <- na.omit(unique(dfN$dateformerge))
+
+for (i in 1:length(datestoprocess)) {
+      vials <- subset(dfN, dateformerge == datestoprocess[i])
+      print(vials)
+      
+}
+
+# test out methods
+vialprac <- vials
+# first extraction only (won't have to search for blanks for other dates like with incubations)
+vialprac2 <- subset(vialprac, dateformerge == datestoprocess[i])
+
+
+
+#   ambientsN <- subset(vialDF, vialDF$SampleName=='amb', select=c(N2Oraw))
+datestoprocess <- standardizedfn$standardizedfilenames
+for (i in 1:length(filestoprocess)) {
+      n=2
+}
+
+
+
+
+
+
+prac <- labdata[1:5,]
 
 
 ########################################################################
