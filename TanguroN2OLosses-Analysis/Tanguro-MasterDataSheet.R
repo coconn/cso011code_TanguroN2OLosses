@@ -13,6 +13,8 @@
 ########################################################################
 # BRING IN DATA / PREP
 
+library(lubridate)
+
 ### bring in soil/abiotic factors data 
 # (this is the one I hand write based on my notebooks)
 abioticfactors <- read.delim("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-RawFolders/abioticfactors.txt", stringsAsFactors=FALSE, na.strings="NA")
@@ -49,6 +51,12 @@ fluxesfullmerge2$Site <- gsub("SD","S2", fluxesfullmerge2$Site, fixed=TRUE)
 fluxesfullmerge2$FluxID <- gsub("SM_","S3_", fluxesfullmerge2$FluxID, fixed=TRUE)
 fluxesfullmerge2$FluxID <- gsub("SD_","S2_", fluxesfullmerge2$FluxID, fixed=TRUE)
 
+# add column for site-date combo name that the soil N data likes
+# do this before you switch the site name to M4
+z<-ymd(fluxesfullmerge2$SampleDate)
+fluxesfullmerge2$DateAlt <- paste(month(z),day(z),substring(as.character(year(z)[2]),3, 4), sep = "/")
+fluxesfullmerge2$easycallname_TMDS_Soil <- do.call(paste, c(fluxesfullmerge2[c("Site", "Chamber", "DateAlt")], sep = "_")) 
+
 # relabel S3 as an M land use, since it did in fact have corn in wet season 2014
 fluxesfullmerge2$LUtype[grep("S3", fluxesfullmerge2$Site)] <- "M"
 fluxesfullmerge2$Site <- gsub("S3","M4", fluxesfullmerge2$Site, fixed=TRUE)
@@ -66,11 +74,47 @@ fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.
 
 
 ########################################################################
-# APPEND THE LEAKAGE CORRECTION ANALYSES
+# APPEND THE SOIL N POOLS AND RATES INFO
+
+# bring in extractionDF
+# see ExtractionCalcs-Rcode.R
+extractionDF <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data-Rprocessed/extractionDF_processed.csv", stringsAsFactors=FALSE)
+
+# extract only the relevant columns
+extractionDFmerge <-  subset(extractionDF, extractionDF$extinc=="ext" & extractionDF$extlazytest=="24") # ensure no repeats
+extractionDFmerge <-  subset(extractionDFmerge, select=c("NO3_N_mgNg", 
+                                                         "NH4_N_mgNg", 
+                                                         "NO3_N_NH4_N_mgNg", 
+                                                         "NO3_N_mgNg_FinalMinusInitial_perDay", 
+                                                         "NH4_N_mgNg_FinalMinusInitial_perDay", 
+                                                         "NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay", 
+                                                         "NO3_N_mgNg_FinalMinusInitial_perDay_AreaBasis", 
+                                                         "NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis", 
+                                                         "NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis", 
+                                                         "easycallname_TMDS_Soil"))
+
+# merge based on easycallname_TMDS_Soil
+fluxesfullmerge2 <- merge(fluxesfullmerge2,extractionDFmerge,by="easycallname_TMDS_Soil", all=TRUE)
+fluxesfullmerge2 <- arrange(fluxesfullmerge2,desc(SampleDate))
 
 
 
+########################################################################
+# ADD SITE SPECIFIC INFO
 
+# bulk density
+
+# bring in extraction and bulk density data
+pathbringin = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/"
+BDdata <- read.csv(paste(pathbringin, "Soil-Data-Rprocessed/soilbulkdensity_processed.csv", sep = ""), stringsAsFactors=FALSE)
+
+BD <- BDdata[BDdata$SampleType=="combo",]
+BD <- BD[c(1,13,14)]
+addon <- BD[BD$Site=="S3",]; addon[1] <- "M4"
+BD <- rbind(BD,addon)
+
+fluxesfullmerge2 <- merge(fluxesfullmerge2, BD, all=TRUE)
+fluxesfullmerge2 <- arrange(fluxesfullmerge2,desc(SampleDate))
 
 
 
@@ -83,13 +127,11 @@ write.csv(fluxesfullmerge2, file=paste(pathsavefiles, "Tanguro-MasterDataSheet.c
 
 
 
-
-
 ########################################################################
 # NOTES AND TESTING
 
 # should I also include the overall site information (totC, totN, BD, etc. as columns here?)
-
+# there's currently no leakage test analysis inclusion
 
 
 ########################################################################
