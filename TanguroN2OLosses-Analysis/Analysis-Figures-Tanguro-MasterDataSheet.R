@@ -27,50 +27,8 @@ library(data.table)
 
 fluxesfullmerge$SampleDate2 <- as.Date(fluxesfullmerge$SampleDate2)
 
-
-# prep table that summarizes by site and date (combines info from multiple chambers)
-
-# data.table
-dtfluxes <- data.table(fluxesfullmerge)
-# create site-date summary table
-sitedatesummary <- dtfluxes[,list(
-      SampleDate2=unique(SampleDate2), 
-      Site=unique(Site), 
-      color.use=unique(color.use), 
-      LUname=unique(LUname),
-      meanfluxN2Ol=mean(na.omit(LinearFlux[GasType=="N2O"])),
-      meanfluxCO2l=mean(na.omit(LinearFlux[GasType=="CO2"])),
-      meanfluxCH4l=mean(na.omit(LinearFlux[GasType=="CH4"])),
-      sdfluxN2Ol=sd(na.omit(LinearFlux[GasType=="N2O"])),
-      sdfluxCO2l=sd(na.omit(LinearFlux[GasType=="CO2"])),  
-      sdfluxCH4l=sd(na.omit(LinearFlux[GasType=="CH4"])),  
-      meanfluxN2Oq=mean(na.omit(QuadFlux[GasType=="N2O"])),
-      meanfluxCO2q=mean(na.omit(QuadFlux[GasType=="CO2"])),
-      meanfluxCH4q=mean(na.omit(QuadFlux[GasType=="CH4"])),
-      sdfluxN2Oq=sd(na.omit(QuadFlux[GasType=="N2O"])),
-      sdfluxCO2q=sd(na.omit(QuadFlux[GasType=="CO2"])),
-      sdfluxCH4q=sd(na.omit(QuadFlux[GasType=="CH4"])),
-      meanSoilMoisPercent=mean(na.omit(SoilMoisPercent)),
-      sdSoilMoisPercent=sd(na.omit(SoilMoisPercent)),
-      meanNO3_N_mgNg=mean(na.omit(NO3_N_mgNg)),
-      sdNO3_N_mgNg=sd(na.omit(NO3_N_mgNg)),
-      meanNH4_N_mgNg=mean(na.omit(NH4_N_mgNg)),
-      sdNH4_N_mgNg=sd(na.omit(NH4_N_mgNg)),
-      meanNO3_N_NH4_N_mgNg=mean(na.omit(NO3_N_NH4_N_mgNg)),
-      sdNO3_N_NH4_N_mgNg=sd(na.omit(NO3_N_NH4_N_mgNg)),
-      meanNO3_N_mgNg_FinalMinusInitial_perDay=mean(na.omit(NO3_N_mgNg_FinalMinusInitial_perDay)),
-      sdNO3_N_mgNg_FinalMinusInitial_perDay=sd(na.omit(NO3_N_mgNg_FinalMinusInitial_perDay)),
-      meanNH4_N_mgNg_FinalMinusInitial_perDay=mean(na.omit(NH4_N_mgNg_FinalMinusInitial_perDay)),
-      sdNH4_N_mgNg_FinalMinusInitial_perDay=sd(na.omit(NH4_N_mgNg_FinalMinusInitial_perDay)),
-      meanNO3_N_NH4_N_mgNg_FinalMinusInitial_perDay=mean(na.omit(NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay)),
-      sdNO3_N_NH4_N_mgNg_FinalMinusInitial_perDay=sd(na.omit(NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay)),
-      meanNO3_N_mgNg_FinalMinusInitial_perDay_AreaBasis=mean(na.omit(NO3_N_mgNg_FinalMinusInitial_perDay_AreaBasis)),
-      sdNO3_N_mgNg_FinalMinusInitial_perDay_AreaBasis=sd(na.omit(NO3_N_mgNg_FinalMinusInitial_perDay_AreaBasis)),
-      meanNH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis=mean(na.omit(NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis)),
-      sdNH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis=sd(na.omit(NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis)),
-      meanNO3_N_NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis=mean(na.omit(NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis)),
-      sdNO3_N_NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis=sd(na.omit(NO3_N_NH4_N_mgNg_FinalMinusInitial_perDay_AreaBasis))),
-      by=easysitename] # include as many variables as desired
+# bring in site-date combination summary data (combines info from multiple chambers)
+sitedatesummary <- read.csv("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Tanguro-MasterSiteDateSummary.csv", stringsAsFactors=FALSE)
 
 # get rid of random NA rows
 sitedatesummary <- subset(sitedatesummary, sitedatesummary$easysitename!="NA")

@@ -104,7 +104,7 @@ fluxesfullmerge2 <- arrange(fluxesfullmerge2,desc(SampleDate))
 
 # bulk density
 
-# bring in extraction and bulk density data
+# bring in bulk density data
 pathbringin = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/"
 BDdata <- read.csv(paste(pathbringin, "Soil-Data-Rprocessed/soilbulkdensity_processed.csv", sep = ""), stringsAsFactors=FALSE)
 

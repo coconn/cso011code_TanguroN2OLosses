@@ -4,6 +4,7 @@
 # CS O'Connell, UMN EEB/IonE
 #
 # master R code for Tanguro Greenhouse Gas paper
+# see cso011w_TanguroN2OLosses for manuscript work
 #
 
 
@@ -35,7 +36,9 @@ source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Soil-Data-Raw-R/Soil-Data
 # BUILD MASTER DATA SHEET
 
 # build Tanguro-MasterDataSheet.csv
-source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Analysis-Figures-Tanguro-MasterDataSheet.R")
+source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Tanguro-MasterDataSheet.R")
+# build Tanguro-MasterSiteDateSummary.csv
+source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis/Tanguro-MasterSiteDateSummary.r")
 
 
 ########################################################################
