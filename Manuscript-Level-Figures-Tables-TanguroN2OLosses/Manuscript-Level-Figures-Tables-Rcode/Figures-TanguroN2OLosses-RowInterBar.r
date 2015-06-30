@@ -128,6 +128,114 @@ dev.off()
 
 
 
+
+
+########################################################################
+# ROW VS. INTERROW SOIL N BAR GRAPHS - INCLUDE POST FERTILIZATION TIME CATEGORY
+
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
+
+# NO3
+
+rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NO3_N_mgNg", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
+
+# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+pattern <- "R|I|F"
+tmp <- grep(pattern, rowintersummary2$RowInter)
+rowintersummary2 <- rowintersummary2[tmp,]
+# get rid of table rows that are NA for postfertcat
+tmp <- !is.na(rowintersummary2$postfertcat)
+rowintersummary2 <- rowintersummary2[tmp,]
+
+# bar graphs
+factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+
+# plot this
+barplotaRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NO3_N_mgNg, fill=RowInter)) + geom_errorbar(aes(ymax=NO3_N_mgNg+sd, ymin=NO3_N_mgNg-0.1*NO3_N_mgNg), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("NO3-N mgN/g") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
+
+# save
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NO3.png", sep=""),width=7,height=7,units="in",res=400)
+barplotaRI
+dev.off()
+
+# NH4
+
+rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NH4_N_mgNg", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
+
+# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+pattern <- "R|I|F"
+tmp <- grep(pattern, rowintersummary2$RowInter)
+rowintersummary2 <- rowintersummary2[tmp,]
+# get rid of table rows that are NA for postfertcat
+tmp <- !is.na(rowintersummary2$postfertcat)
+rowintersummary2 <- rowintersummary2[tmp,]
+
+# bar graphs
+factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+
+# plot this
+barplotbRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NH4_N_mgNg, fill=RowInter)) + geom_errorbar(aes(ymax=NH4_N_mgNg+sd, ymin=NH4_N_mgNg-0.1*NH4_N_mgNg), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("NH4-N mgN/g") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
+
+# save
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NH4.png", sep=""),width=7,height=7,units="in",res=400)
+barplotbRI
+dev.off()
+
+
+# NO3_N_mgNg_FinalMinusInitial_perDay
+
+rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NO3_N_mgNg_FinalMinusInitial_perDay", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
+
+# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+pattern <- "R|I|F"
+tmp <- grep(pattern, rowintersummary2$RowInter)
+rowintersummary2 <- rowintersummary2[tmp,]
+# get rid of table rows that are NA for postfertcat
+tmp <- !is.na(rowintersummary2$postfertcat)
+rowintersummary2 <- rowintersummary2[tmp,]
+
+# bar graphs
+factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+
+# plot this
+barplotcRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NO3_N_mgNg_FinalMinusInitial_perDay, fill=RowInter)) + geom_errorbar(aes(ymax=NO3_N_mgNg_FinalMinusInitial_perDay+sd, ymin=NO3_N_mgNg_FinalMinusInitial_perDay-0.1*NO3_N_mgNg_FinalMinusInitial_perDay), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Net nitrification (NO3), area basis, mg N m-2 day-1") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
+
+# save
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-nitr.png", sep=""),width=7,height=7,units="in",res=400)
+barplotcRI
+dev.off()
+
+
+# NH4_N_mgNg_FinalMinusInitial_perDay
+
+rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NH4_N_mgNg_FinalMinusInitial_perDay", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
+
+# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+pattern <- "R|I|F"
+tmp <- grep(pattern, rowintersummary2$RowInter)
+rowintersummary2 <- rowintersummary2[tmp,]
+# get rid of table rows that are NA for postfertcat
+tmp <- !is.na(rowintersummary2$postfertcat)
+rowintersummary2 <- rowintersummary2[tmp,]
+
+# bar graphs
+factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+
+# plot this
+barplotdRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NH4_N_mgNg_FinalMinusInitial_perDay, fill=RowInter)) + geom_errorbar(aes(ymax=NH4_N_mgNg_FinalMinusInitial_perDay+sd, ymin=NH4_N_mgNg_FinalMinusInitial_perDay-0.1*NH4_N_mgNg_FinalMinusInitial_perDay), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Net ammonification (NH4), area basis, mg N m-2 day-1") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
+
+# save
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-ammon.png", sep=""),width=7,height=7,units="in",res=400)
+barplotdRI
+dev.off()
+
+# all four together
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-soilN.png", sep=""),width=11,height=11,units="in",res=400)
+grid_arrange_shared_legend(barplotaRI, barplotbRI, barplotcRI, barplotdRI, nrow = 1, ncol = 4)
+dev.off()
+
+
+
 ########################################################################
 # NOTES AND TESTING
 
@@ -138,7 +246,7 @@ dev.off()
 ########################################################################
 # POSSIBLE TO DO
 
-###### line graph style - too hard to read, so switch to bar graphs
+###### the below is line graph style - too hard to read, so switch to bar graphs
 
 # # subset
 # # add col that's row, inter, or main (then in ggplot you'll set color = RowInter or linetype = RowInter or point shape)
