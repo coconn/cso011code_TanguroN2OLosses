@@ -71,6 +71,11 @@ fluxesfullmerge2 <- transform(fluxesfullmerge2, color.use = ifelse(LUtype=="M", 
 # create a col to assign a better name to each land use
 fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
 
+# create a col to establish a post-fertilization time category variable
+fluxesfullmerge2 <- transform(fluxesfullmerge2, postfertcat = ifelse(FertTimeElapsedMaizePlanting<=15, as.character("postfert"), ifelse(FertTimeElapsedMaizeBroadcast<=15, as.character("postfert"), as.character("notpostfert"))))
+fluxesfullmerge2$postfertcat <- as.character(fluxesfullmerge2$postfertcat)
+fluxesfullmerge2$postfertcat[grep("F", fluxesfullmerge2$LUtype)] <- "forestpostfert"
+fluxesfullmerge2$postfertcat[grep("S", fluxesfullmerge2$LUtype)] <- "soypostfert"
 
 
 ########################################################################
@@ -115,7 +120,6 @@ BD <- rbind(BD,addon)
 
 fluxesfullmerge2 <- merge(fluxesfullmerge2, BD, all=TRUE)
 fluxesfullmerge2 <- arrange(fluxesfullmerge2,desc(SampleDate))
-
 
 
 ########################################################################

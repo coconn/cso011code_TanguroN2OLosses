@@ -57,11 +57,19 @@ source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/TanguroN2OLosses-Analysis
 ########################################################################
 # MANUSCRIPT FIGURES
 
+# scatterplots of trace gas vs. moisture and soil N variables
+source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Manuscript-Level-Figures-Tables-TanguroN2OLosses/Manuscript-Level-Figures-Tables-Rcode/Figures-TanguroN2OLosses-scatterplotmatrix.r")
+
+# scatterplots of trace gas vs. moisture and soil N variables
+source("~/Documents/GITHUB/cso011code_TanguroN2OLosses/Manuscript-Level-Figures-Tables-TanguroN2OLosses/Manuscript-Level-Figures-Tables-Rcode/Figures-TanguroN2OLosses-Sitelinegraphs.R")
+
 
 
 
 ########################################################################
 # MANUSCRIPT ANALYSES
+
+
 
 
 
