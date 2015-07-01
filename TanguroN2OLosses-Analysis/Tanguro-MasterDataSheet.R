@@ -72,10 +72,22 @@ fluxesfullmerge2 <- transform(fluxesfullmerge2, color.use = ifelse(LUtype=="M", 
 fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
 
 # create a col to establish a post-fertilization time category variable
-fluxesfullmerge2 <- transform(fluxesfullmerge2, postfertcat = ifelse(FertTimeElapsedMaizePlanting<=15, as.character("postfert"), ifelse(FertTimeElapsedMaizeBroadcast<=15, as.character("postfert"), as.character("notpostfert"))))
-fluxesfullmerge2$postfertcat <- as.character(fluxesfullmerge2$postfertcat)
-fluxesfullmerge2$postfertcat[grep("F", fluxesfullmerge2$LUtype)] <- "forestpostfert"
-fluxesfullmerge2$postfertcat[grep("S", fluxesfullmerge2$LUtype)] <- "soypostfert"
+fluxesfullmerge2$postfertcat <- NA
+fluxesfullmerge2$postfertcat[grepl("M", fluxesfullmerge2$LUtype)] <- "notpostfert"
+fluxesfullmerge2$postfertcat[fluxesfullmerge2$FertTimeElapsedMaizePlanting<=15 & fluxesfullmerge2$FertTimeElapsedMaizePlanting>-1] <- "postfert"
+fluxesfullmerge2$postfertcat[fluxesfullmerge2$FertTimeElapsedMaizeBroadcast<=15 & fluxesfullmerge2$FertTimeElapsedMaizeBroadcast>-1] <- "postfert"
+fluxesfullmerge2$postfertcat[grepl("F", fluxesfullmerge2$LUtype)] <- "forestpostfert"
+fluxesfullmerge2$postfertcat[grepl("S", fluxesfullmerge2$LUtype)] <- "soypostfert"
+
+# create a col to establish an annual estimate variable
+fluxesfullmerge2$annualest <- NA
+fluxesfullmerge2$annualest[grepl("F", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Wet"] <- "F_wet"
+fluxesfullmerge2$annualest[grepl("F", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Dry"] <- "F_dry"
+fluxesfullmerge2$annualest[grepl("S", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Wet"] <- "S_wet"
+fluxesfullmerge2$annualest[grepl("S", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Dry"] <- "S_dry"
+fluxesfullmerge2$annualest[grepl("M", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Wet"] <- "M_wet"
+fluxesfullmerge2$annualest[grepl("M", fluxesfullmerge2$LUtype) & fluxesfullmerge2$postfertcat=="postfert"] <- "M_postfert"
+fluxesfullmerge2$annualest[grepl("M", fluxesfullmerge2$LUtype) & fluxesfullmerge2$Season=="Dry"] <- "M_dry"
 
 
 ########################################################################

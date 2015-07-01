@@ -8,16 +8,6 @@
 # UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 fluxes are in migrograms/cm2/h, N2O are in nanograms/cm2/h.
 
 
-
-### list of figures to make
-# publication applicable fluxes over time (for each site, I reckon)
-# publication applicable soil inorg N and moisture over time (for each site, I reckon)
-# include fertilization events in these
-# row-interrow bar graphs (whole period vs. only in the post-fert windows)
-# correlaion table of log-transformed variables (simple scatterplots)
-
-
-
 ########################################################################
 # BRING IN DATA / PREP
 
@@ -42,45 +32,13 @@ fluxesfullmerge <- subset(fluxesfullmerge, fluxesfullmerge$easysitename!="NA")
 pathsavefigures = "~/Documents/GITHUB/cso011code_TanguroN2OLosses/Manuscript-Level-Figures-Tables-TanguroN2OLosses/Manuscript-Level-Figures-Tables-RProcessed/"
 
 
-########################################################################
-# ROW VS. INTERROW MEAN FLUX BAR GRAPHS - NO DATES OR SITE
-
-source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
-
-rowintersummary <- summarySE(data=fluxesfullmerge, measurevar="LinearFlux", groupvars=c("GasType","LUtype","RowInter"), na.rm=TRUE)
-
-# get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
-pattern <- "R|I|F"
-tmp <- grep(pattern, rowintersummary$RowInter)
-rowintersummary <- rowintersummary[tmp,]
-# weird row where gas == NA
-ok <- complete.cases(rowintersummary$GasType)
-rowintersummary <- rowintersummary[ok,]
-
-# bar graphs
-factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
-
-barplotaRI <- ggplot(data=subset(rowintersummary,GasType=="N2O"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="N2O")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux N2O: ngN / cm2 / h") + xlab("Land Use Type") + theme_bw() + theme(legend.position="none")
-
-barplotbRI <- ggplot(data=subset(rowintersummary,GasType=="CO2"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CO2")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CO2: ugC / cm2 / h") + xlab("Land Use Type") + theme_bw() + theme(legend.position="none")
-
-barplotcRI <- ggplot(data=subset(rowintersummary,GasType=="CH4"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymin=LinearFlux-sd, ymax=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CH4")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CH4: ugC / cm2 / h") + xlab("Land Use Type") + theme_bw() 
-
-# grid.arrange and save
-source("~/Documents/GITHUB/RPersonalFunctionsChristine/grid_arrange_shared_legend.r")
-png(file = paste(pathsavefigures, "flux-rowinter-barplots.png", sep=""),width=7,height=10,units="in",res=400)
-grid_arrange_shared_legend(barplotaRI, barplotbRI, barplotcRI, nrow = 1, ncol = 3)
-dev.off()
-
-#grid.arrange(barplotaRI, barplotbRI, barplotcRI, nrow = 1, ncol = 3)
-
-
 
 ########################################################################
 # ROW VS. INTERROW MEAN FLUX BAR GRAPHS - INCLUDE POST FERTILIZATION TIME CATEGORY
 
 source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
 
+# fluxes
 rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="LinearFlux", groupvars=c("GasType","LUtype","RowInter", "postfertcat"), na.rm=TRUE)
 
 # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
@@ -97,12 +55,98 @@ rowintersummary2 <- rowintersummary2[tmp,]
 # bar graphs
 factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
 
-# plot this
+# statistical tests between bars
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/gen_data_aov_onlymeansdN.r")
+
+
+########################################################################
+# ROW VS. INTERROW MEAN FLUX BAR GRAPHS - N2O
+
+# plot
 barplotaRI <- ggplot(data=subset(rowintersummary2,GasType=="N2O"), aes(x=factor(postfertcat), y=LinearFlux, fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary2,GasType=="N2O")) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Flux N2O: ngN / cm2 / h") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
+# one-way anova
+datasubset <- subset(rowintersummary2,GasType=="N2O")
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$LinearFlux, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(av) # diagnostic plots
+# no bars are significantly different
+
+# two-way anova
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+aovsubset <- subset(aovsubset, aovsubset$GasType=="N2O")
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# bar 1 and bar 5 are different to p<0.1
+
+# # put stat test info into plot
+# barplotaRI <- barplotaRI + annotate("text",x=.5, y=11,label="Two-way ANOVA:\np < 0.1 (Category)", hjust = 0)
+# barplotaRI <- barplotaRI + annotate("text",x=1, y=3,label="a") + annotate("text",x=2, y=2,label="ab") + annotate("text",x=3, y=11,label="b") + annotate("text",x=4, y=3,label="ab")
+
+
+########################################################################
+# ROW VS. INTERROW MEAN FLUX BAR GRAPHS - CO2
+
+# plot
 barplotbRI <- ggplot(data=subset(rowintersummary2,GasType=="CO2"), aes(x=factor(postfertcat), y=LinearFlux, fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary2,GasType=="CO2")) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Flux CO2: ugC / cm2 / h") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
-barplotcRI <- ggplot(data=subset(rowintersummary2,GasType=="CH4"), aes(x=factor(postfertcat), y=LinearFlux, fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux-sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary2,GasType=="CH4")) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Flux CH4: ugC / cm2 / h") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
+# one-way anova
+datasubset <- subset(rowintersummary2,GasType=="CO2")
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$LinearFlux, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# bar 7 is different from every other bar; bars 1-6 are not significantly different
+
+# two-way anova
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+aovsubset <- subset(aovsubset, aovsubset$GasType=="CO2")
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# soy row and forest differ, soy row and maize not post I differ, soy row and maize post I differ, soy R and soy I differ, soy R and maize not post R, soy R and maize post R differ
+
+# put stat test info into plot
+# barplotbRI <- barplotbRI + annotate("text",x=.5, y=55,label="Two-way ANOVA:\np < 0.01 (Category)\np < 0.001 (Row-Inter)\np < 0.01 (Interaction)", hjust = 0)
+barplotbRI <- barplotbRI + annotate("text",x=c(1, 1.76, 2.22, 2.75, 3.24, 3.75, 4.22), y=c(22, 17, 22, 23, 36, 22, 61),label=c("a","a","a","a","a","a","b"))
+
+
+########################################################################
+# ROW VS. INTERROW MEAN FLUX BAR GRAPHS - CH4
+
+# plot
+barplotcRI <- ggplot(data=subset(rowintersummary2,GasType=="CH4"), aes(x=factor(postfertcat), y=LinearFlux, fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux-sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary2,GasType=="CH4")) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Flux CH4: ugC / cm2 / h") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + xlab("Category")
+
+# one-way anova
+datasubset <- subset(rowintersummary2,GasType=="CH4")
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$LinearFlux, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# no bars are significantly different
+
+# two-way anova
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+aovsubset <- subset(aovsubset, aovsubset$GasType=="CH4")
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# no significant differences
+
+
+########################################################################
+# SAVE ROW VS. INTERROW MEAN FLUX BAR GRAPHS
 
 # grid.arrange and save
 source("~/Documents/GITHUB/RPersonalFunctionsChristine/grid_arrange_shared_legend.r")
@@ -126,17 +170,10 @@ barplotcRI
 dev.off()
 
 
-
-
-
-
 ########################################################################
-# ROW VS. INTERROW SOIL N BAR GRAPHS - INCLUDE POST FERTILIZATION TIME CATEGORY
-
-source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
+# ROW VS. INTERROW SOIL N BAR GRAPHS - NO3
 
 # NO3
-
 rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NO3_N_mgNg", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
 
 # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
@@ -147,19 +184,35 @@ rowintersummary2 <- rowintersummary2[tmp,]
 tmp <- !is.na(rowintersummary2$postfertcat)
 rowintersummary2 <- rowintersummary2[tmp,]
 
-# bar graphs
-factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
-
-# plot this
+# plot
 barplotaRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NO3_N_mgNg, fill=RowInter)) + geom_errorbar(aes(ymax=NO3_N_mgNg+sd, ymin=NO3_N_mgNg-0.1*NO3_N_mgNg), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("NO3-N mgN/g") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
-# save
-png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NO3.png", sep=""),width=7,height=7,units="in",res=400)
-barplotaRI
-dev.off()
+# one-way anova
+datasubset <- rowintersummary2
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$NO3_N_mgNg, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# who differs? 3-1, 5-1, 6-3, 7-3, 6-5, 7-5
+
+# two-way anova
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+fit <- aov(NO3_N_mgNg ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# who differs? from postfertcat: postfert-forestpostfert, soypostfert-postfert
+
+# put stat test info into plot
+barplotaRI <- barplotaRI + annotate("text",x=1, y=0.0018,label="a") + annotate("text",x=2, y=0.0032,label="ab") + annotate("text",x=3, y=0.009,label="b") + annotate("text",x=4, y=0.0022,label="a")
+
+
+########################################################################
+# ROW VS. INTERROW SOIL N BAR GRAPHS - NH4
 
 # NH4
-
 rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NH4_N_mgNg", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
 
 # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
@@ -170,20 +223,35 @@ rowintersummary2 <- rowintersummary2[tmp,]
 tmp <- !is.na(rowintersummary2$postfertcat)
 rowintersummary2 <- rowintersummary2[tmp,]
 
-# bar graphs
-factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
-
 # plot this
 barplotbRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NH4_N_mgNg, fill=RowInter)) + geom_errorbar(aes(ymax=NH4_N_mgNg+sd, ymin=NH4_N_mgNg-0.1*NH4_N_mgNg), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("NH4-N mgN/g") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
-# save
-png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NH4.png", sep=""),width=7,height=7,units="in",res=400)
-barplotbRI
-dev.off()
+# one-way anova
+datasubset <- rowintersummary2
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$NH4_N_mgNg, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# who differs? 5-1, 6-5, 7-5
 
+# two-way ANOVA
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# who differs?
+
+# put stat test info into plot
+barplotbRI <- barplotbRI + annotate("text",x=1, y=0.006,label="a") + annotate("text",x=2, y=0.002,label="b") + annotate("text",x=3, y=0.03,label="c") + annotate("text",x=4, y=0.0022,label="b")
+
+
+########################################################################
+# ROW VS. INTERROW SOIL N BAR GRAPHS - NET NITR
 
 # NO3_N_mgNg_FinalMinusInitial_perDay
-
 rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NO3_N_mgNg_FinalMinusInitial_perDay", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
 
 # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
@@ -194,20 +262,35 @@ rowintersummary2 <- rowintersummary2[tmp,]
 tmp <- !is.na(rowintersummary2$postfertcat)
 rowintersummary2 <- rowintersummary2[tmp,]
 
-# bar graphs
-factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
-
 # plot this
 barplotcRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NO3_N_mgNg_FinalMinusInitial_perDay, fill=RowInter)) + geom_errorbar(aes(ymax=NO3_N_mgNg_FinalMinusInitial_perDay+sd, ymin=NO3_N_mgNg_FinalMinusInitial_perDay-0.1*NO3_N_mgNg_FinalMinusInitial_perDay), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Net nitrification (NO3), area basis, mg N m-2 day-1") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
-# save
-png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-nitr.png", sep=""),width=7,height=7,units="in",res=400)
-barplotcRI
-dev.off()
+# one-way anova
+datasubset <- rowintersummary2
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$NO3_N_mgNg_FinalMinusInitial_perDay, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# who differs? 6-5, 7-5
 
+# two-way ANOVA
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# who differs?
+
+# put stat test info into plot
+barplotcRI <- barplotcRI + annotate("text",x=c(1, 1.76, 2.22, 2.75, 3.24, 3.75, 4.22), y=c(0.015, 0.008, 0.008, 0.015, 0.032, 0.007, 0.007),label=c("ab","ab","ab","ab","b","a","a"))
+
+
+########################################################################
+# ROW VS. INTERROW SOIL N BAR GRAPHS - NET AMMON
 
 # NH4_N_mgNg_FinalMinusInitial_perDay
-
 rowintersummary2 <- summarySE(data=fluxesfullmerge, measurevar="NH4_N_mgNg_FinalMinusInitial_perDay", groupvars=c("LUtype","RowInter", "postfertcat"), na.rm=TRUE)
 
 # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
@@ -218,13 +301,50 @@ rowintersummary2 <- rowintersummary2[tmp,]
 tmp <- !is.na(rowintersummary2$postfertcat)
 rowintersummary2 <- rowintersummary2[tmp,]
 
-# bar graphs
-factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
-
-# plot this
+# plot 
 barplotdRI <- ggplot(data=rowintersummary2, aes(x=factor(postfertcat), y=NH4_N_mgNg_FinalMinusInitial_perDay, fill=RowInter)) + geom_errorbar(aes(ymax=NH4_N_mgNg_FinalMinusInitial_perDay+sd, ymin=NH4_N_mgNg_FinalMinusInitial_perDay-0.1*NH4_N_mgNg_FinalMinusInitial_perDay), position=position_dodge(0.9),width=.25, data=rowintersummary2) + geom_bar(stat="identity", position="dodge") + scale_fill_manual(values = factorcolors) + ylab("Net ammonification (NH4), area basis, mg N m-2 day-1") + theme_bw() + scale_x_discrete(breaks=c("forestpostfert", "notpostfert", "postfert", "soypostfert"), labels=c("F", "M not within \n 15 days of fert ", "M =< 15 \n days post fert", "S")) + theme(axis.title.x = element_blank())
 
-# save
+# one-way anova
+datasubset <- rowintersummary2
+simulated_data <- gen_data_aov_onlymeansdN(datasubset$NH4_N_mgNg_FinalMinusInitial_perDay, datasubset$sd,datasubset$N)
+av <- aov(y ~ group, data = simulated_data)
+summary(av)
+TukeyHSD(av)
+layout(matrix(c(1,2,3,4),2,2)) # optional layout 
+plot(fit) # diagnostic plots
+# who differs? 5-1
+
+# two-way ANOVA
+tmp <- !is.na(fluxesfullmerge$postfertcat)
+aovsubset <- fluxesfullmerge[tmp,]
+fit <- aov(LinearFlux ~ postfertcat*RowInter, data=aovsubset)
+summary(fit) # show results
+TukeyHSD(fit)
+# who differs?
+
+# put stat test info into plot
+barplotdRI <- barplotdRI + annotate("text",x=c(1, 1.76, 2.22, 2.75, 3.24, 3.75, 4.22), y=c(0.002, 0.0022, 0.0022, 0.006, 0.013, 0.002, 0.002),label=c("a","a","a","b","c","a","a"))
+
+
+########################################################################
+# SAVE ROW VS. INTERROW SOIL N BAR GRAPHS
+
+# NO3
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NO3.png", sep=""),width=7,height=7,units="in",res=400)
+barplotaRI
+dev.off()
+
+# NH4
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-NH4.png", sep=""),width=7,height=7,units="in",res=400)
+barplotbRI
+dev.off()
+
+# net ammon
+png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-nitr.png", sep=""),width=7,height=7,units="in",res=400)
+barplotcRI
+dev.off()
+
+# net nitr
 png(file = paste(pathsavefigures, "flux-rowinter-barplots-fertcat-ammon.png", sep=""),width=7,height=7,units="in",res=400)
 barplotdRI
 dev.off()
@@ -239,12 +359,61 @@ dev.off()
 ########################################################################
 # NOTES AND TESTING
 
-# if you run ANOVAs, go back and put the values on the graphs if any are significant
+
+
+
+
+
+
+
 
 
 
 ########################################################################
-# POSSIBLE TO DO
+# FIGURES I DECIDED NOT TO INCLUDE IN THE FINAL MANUSCRIPT FIG SET
+
+
+
+########################################################################
+# ROW VS. INTERROW MEAN FLUX BAR GRAPHS - NO DATES OR SITE
+
+## this does a bar graph comparison of F, M, S for row-inter-row, but doesn't separate by post-fertilization or not
+
+# source("~/Documents/GITHUB/RPersonalFunctionsChristine/summarySE.r")
+# 
+# rowintersummary <- summarySE(data=fluxesfullmerge, measurevar="LinearFlux", groupvars=c("GasType","LUtype","RowInter"), na.rm=TRUE)
+# 
+# # get rid of table rows that aren't row or interrow or forest (e.g., NA or blank)
+# pattern <- "R|I|F"
+# tmp <- grep(pattern, rowintersummary$RowInter)
+# rowintersummary <- rowintersummary[tmp,]
+# # weird row where gas == NA
+# ok <- complete.cases(rowintersummary$GasType)
+# rowintersummary <- rowintersummary[ok,]
+# 
+# # bar graphs
+# factorcolors <- c("#66a61e","#1f78b4","#d95f02") # colorbrewer qualitative
+# 
+# barplotaRI <- ggplot(data=subset(rowintersummary,GasType=="N2O"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="N2O")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux N2O: ngN / cm2 / h") + xlab("Land Use Type") + theme_bw() + theme(legend.position="none")
+# 
+# barplotbRI <- ggplot(data=subset(rowintersummary,GasType=="CO2"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymax=LinearFlux+sd, ymin=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CO2")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CO2: ugC / cm2 / h") + xlab("Land Use Type") + theme_bw() + theme(legend.position="none")
+# 
+# barplotcRI <- ggplot(data=subset(rowintersummary,GasType=="CH4"), aes(x=LUtype, y=LinearFlux, group=RowInter,fill=RowInter)) + geom_errorbar(aes(ymin=LinearFlux-sd, ymax=LinearFlux-0.1*LinearFlux), position=position_dodge(0.9),width=.25, data=subset(rowintersummary,GasType=="CH4")) + geom_bar(position='dodge', stat='identity') + scale_fill_manual(values = factorcolors) + ylab("Flux CH4: ugC / cm2 / h") + xlab("Land Use Type") + theme_bw() 
+# 
+# # grid.arrange and save
+# source("~/Documents/GITHUB/RPersonalFunctionsChristine/grid_arrange_shared_legend.r")
+# png(file = paste(pathsavefigures, "flux-rowinter-barplots.png", sep=""),width=7,height=10,units="in",res=400)
+# grid_arrange_shared_legend(barplotaRI, barplotbRI, barplotcRI, nrow = 1, ncol = 3)
+# dev.off()
+# 
+# #grid.arrange(barplotaRI, barplotbRI, barplotcRI, nrow = 1, ncol = 3)
+
+
+
+
+
+########################################################################
+# ROW VS. INTERROW LINE GRAPHS
 
 ###### the below is line graph style - too hard to read, so switch to bar graphs
 
