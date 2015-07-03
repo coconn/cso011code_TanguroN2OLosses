@@ -116,7 +116,7 @@ TukeyHSD(fit)
 
 # put stat test info into plot
 # barplotbRI <- barplotbRI + annotate("text",x=.5, y=55,label="Two-way ANOVA:\np < 0.01 (Category)\np < 0.001 (Row-Inter)\np < 0.01 (Interaction)", hjust = 0)
-barplotbRI <- barplotbRI + annotate("text",x=c(1, 1.76, 2.22, 2.75, 3.24, 3.75, 4.22), y=c(22, 17, 22, 23, 36, 22, 61),label=c("a","a","a","a","a","a","b"))
+barplotbRI <- barplotbRI + annotate("text",x=c(1, 1.76, 2.22, 2.75, 3.24, 3.75, 4.22), y=c(22, 22, 32, 23, 36, 22, 61),label=c("a","a","a","a","a","a","b"))
 
 
 ########################################################################
@@ -206,7 +206,7 @@ TukeyHSD(fit)
 # who differs? from postfertcat: postfert-forestpostfert, soypostfert-postfert
 
 # put stat test info into plot
-barplotaRI <- barplotaRI + annotate("text",x=1, y=0.0018,label="a") + annotate("text",x=2, y=0.0032,label="ab") + annotate("text",x=3, y=0.009,label="b") + annotate("text",x=4, y=0.0022,label="a")
+barplotaRI <- barplotaRI + annotate("text",x=1, y=0.0018,label="a") + annotate("text",x=2, y=0.0032,label="b") + annotate("text",x=3, y=0.009,label="b") + annotate("text",x=4, y=0.0022,label="a")
 
 
 ########################################################################
