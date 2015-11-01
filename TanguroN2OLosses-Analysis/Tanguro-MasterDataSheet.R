@@ -69,7 +69,7 @@ fluxesfullmerge2$easysitename <- do.call(paste, c(fluxesfullmerge2[c("Site", "Sa
 fluxesfullmerge2 <- transform(fluxesfullmerge2, color.use = ifelse(LUtype=="M", as.character("darkorange"), ifelse(LUtype=="F", as.character("darkgreen"), as.character("darkblue"))))
 
 # create a col to assign a better name to each land use
-fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soya/Maize DC"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soya SC"))))
+fluxesfullmerge2 <- transform(fluxesfullmerge2, LUname = ifelse(LUtype=="M", as.character("Soybean/Maize"), ifelse(LUtype=="F", as.character("Forest"), as.character("Soybean"))))
 
 # create a col to establish a post-fertilization time category variable
 fluxesfullmerge2$postfertcat <- NA

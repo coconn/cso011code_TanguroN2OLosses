@@ -5,7 +5,7 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
-# UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 and CH4 fluxes are in migrograms/cm2/h, N2O are in nanograms/cm2/h.
+# UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 and CH4 fluxes are in migrograms/cm^2/h, N2O are in nanograms/cm^2/h.
 
 
 ########################################################################
@@ -91,12 +91,30 @@ oconnelldiss_tanuro_scatterplots <- function(corrdf,colnames,xlab,ylab,corinfo) 
       
 }
 
+oconnelldiss_tanuro_scatterplots_legendbottom <- function(corrdf,colnames,xlab,ylab,corinfo) {
+      
+      plotdf <- corrdf[,colnames]
+      
+      p <- ggplot(plotdf, aes(x=plotdf[,3], y=plotdf[,2], color=plotdf[,1]), environment = environment()) 
+      p <- p + geom_point(shape=1) 
+      p <- p + scale_colour_manual(values = factorcolors) 
+      p <- p + geom_smooth(size=0.75, method = "lm", se=FALSE) 
+      p <- p + geom_smooth(size=0.75, method = "lm", se=FALSE, fullrange=TRUE, lty = 2) 
+      p <- p + theme_bw() 
+      p <- p + ylab(ylabel) 
+      p <- p + xlab(xlabel) 
+      p <- p + annotate(geom="text", x = -Inf, y = -Inf, hjust=-0.05, vjust=-3.6, label = corinfo$infotmp[1], parse = T) 
+      p <- p + annotate(geom="text", x = -Inf, y = -Inf, hjust=-0.05, vjust=-2.4, label = corinfo$infotmp[2], parse = T) 
+      p + annotate(geom="text", x = -Inf, y = -Inf, hjust=-0.05, vjust=-1.2, label = corinfo$infotmp[3], parse = T) + theme(legend.position="none")
+      
+}
+
 
 ########################################################################
 # BUILD SCATTERPLOTS
 
 ## N2O
-ylabel <- "Flux N2O: ngN / cm2 / h"
+ylabel <- "Flux N2O: ngN / cm^2 / h"
 
 colnames <- c("LUtype","LinearFluxN2O","SoilMoisPercent")
 xlabel <- "% Soil Moisture"
@@ -153,7 +171,7 @@ p7n <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,yla
 
 
 ## CO2
-ylabel <- "Flux CO2: ugC / cm2 / h"
+ylabel <- "Flux CO2: ugC / cm^2 / h"
 
 colnames <- c("LUtype","LinearFluxCO2","SoilMoisPercent")
 xlabel <- "% Soil Moisture"
@@ -167,21 +185,21 @@ xlabel <- "NO3-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_N_mgNg,LinearFluxCO2)$estimate,
                  pval=corfun(NO3_N_mgNg,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_N_mgNg,LinearFluxCO2,unique(as.character(LUtype))))
-p2co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p2co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 colnames <- c("LUtype","LinearFluxCO2","NH4_N_mgNg")
 xlabel <- "NH4-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NH4_N_mgNg,LinearFluxCO2)$estimate,
                  pval=corfun(NH4_N_mgNg,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NH4_N_mgNg,LinearFluxCO2,unique(as.character(LUtype))))
-p3co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p3co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 colnames <- c("LUtype","LinearFluxCO2","NO3_N_NH4_N_mgNg")
 xlabel <- "NO3-N + NH4-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_N_NH4_N_mgNg,LinearFluxCO2)$estimate,
                  pval=corfun(NO3_N_NH4_N_mgNg,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_N_NH4_N_mgNg,LinearFluxCO2,unique(as.character(LUtype))))
-p4co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p4co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","LinearFluxCO2","NO3_netnitr_perDay_AreaBasis")
@@ -189,7 +207,7 @@ xlabel <- "Net nitrificationrate (NO3), area basis, mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_netnitr_perDay_AreaBasis,LinearFluxCO2)$estimate,
                  pval=corfun(NO3_netnitr_perDay_AreaBasis,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_netnitr_perDay_AreaBasis,LinearFluxCO2,unique(as.character(LUtype))))
-p5co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p5co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","LinearFluxCO2","NH4_netamm_FinalMinusInitial_perDay_AreaBasis")
@@ -197,7 +215,7 @@ xlabel <- "Net ammonificationrate (NH4), area basis, mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2)$estimate,
                  pval=corfun(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2,unique(as.character(LUtype))))
-p6co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p6co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","LinearFluxCO2","NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis")
@@ -205,11 +223,11 @@ xlabel <- "Net mineralizationrate area basis (NO3 + NH4), mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2)$estimate,
                  pval=corfun(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,LinearFluxCO2,unique(as.character(LUtype))))
-p7co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p7co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 ## CH4
-ylabel <- "Flux CH4: ugC / cm2 / h"
+ylabel <- "Flux CH4: ugC / cm^2 / h"
 
 colnames <- c("LUtype","LinearFluxCH4","SoilMoisPercent")
 xlabel <- "% Soil Moisture"
@@ -335,7 +353,7 @@ corrdf <- transform(corrdf, FluxCH4LogTrans = log(LinearFluxCH4+5))
 
 
 ## N2O
-ylabel <- "Natural Log (Flux N2O: ngN / cm2 / h)"
+ylabel <- "Natural Log (Flux N2O: ngN / cm^2 / h)"
 
 colnames <- c("LUtype","FluxN2OLogTrans","SoilMoisPercent")
 xlabel <- "% Soil Moisture"
@@ -392,7 +410,7 @@ p7n <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,yla
 
 
 ## CO2
-ylabel <- "Natural Lag (Flux CO2: ugC / cm2 / h)"
+ylabel <- "Natural Lag (Flux CO2: ugC / cm^2 / h)"
 
 colnames <- c("LUtype","FluxCO2LogTrans","SoilMoisPercent")
 xlabel <- "% Soil Moisture"
@@ -406,21 +424,21 @@ xlabel <- "NO3-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_N_mgNg,FluxCO2LogTrans)$estimate,
                  pval=corfun(NO3_N_mgNg,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_N_mgNg,FluxCO2LogTrans,unique(as.character(LUtype))))
-p2co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p2co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 colnames <- c("LUtype","FluxCO2LogTrans","NH4_N_mgNg")
 xlabel <- "NH4-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NH4_N_mgNg,FluxCO2LogTrans)$estimate,
                  pval=corfun(NH4_N_mgNg,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NH4_N_mgNg,FluxCO2LogTrans,unique(as.character(LUtype))))
-p3co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p3co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 colnames <- c("LUtype","FluxCO2LogTrans","NO3_N_NH4_N_mgNg")
 xlabel <- "NO3-N + NH4-N mgN/g"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_N_NH4_N_mgNg,FluxCO2LogTrans)$estimate,
                  pval=corfun(NO3_N_NH4_N_mgNg,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_N_NH4_N_mgNg,FluxCO2LogTrans,unique(as.character(LUtype))))
-p4co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p4co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","FluxCO2LogTrans","NO3_netnitr_perDay_AreaBasis")
@@ -428,7 +446,7 @@ xlabel <- "Net nitrificationrate (NO3), area basis, mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_netnitr_perDay_AreaBasis,FluxCO2LogTrans)$estimate,
                  pval=corfun(NO3_netnitr_perDay_AreaBasis,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_netnitr_perDay_AreaBasis,FluxCO2LogTrans,unique(as.character(LUtype))))
-p5co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p5co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","FluxCO2LogTrans","NH4_netamm_FinalMinusInitial_perDay_AreaBasis")
@@ -436,7 +454,7 @@ xlabel <- "Net ammonificationrate (NH4), area basis, mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans)$estimate,
                  pval=corfun(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NH4_netamm_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans,unique(as.character(LUtype))))
-p6co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p6co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 colnames <- c("LUtype","FluxCO2LogTrans","NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis")
@@ -444,11 +462,11 @@ xlabel <- "Net mineralizationrate area basis (NO3 + NH4), mg N m-2 day-1"
 corinfo <- ddply(corrdf, .(LUtype), summarise, est=corfun(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans)$estimate,
                  pval=corfun(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans)$p.value,
                  n=length(LUtype), infotmp=cor_stars_info(NO3_NH4_netmin_FinalMinusInitial_perDay_AreaBasis,FluxCO2LogTrans,unique(as.character(LUtype))))
-p7co <- oconnelldiss_tanuro_scatterplots(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
+p7co <- oconnelldiss_tanuro_scatterplots_legendbottom(corrdf,colnames=colnames,xlab=xlabel,ylab=ylabel,corinfo=corinfo)
 
 
 ## CH4
-ylabel <- "Natural Log (Flux CH4: ugC / cm2 / h)"
+ylabel <- "Natural Log (Flux CH4: ugC / cm^2 / h)"
 
 colnames <- c("LUtype","FluxCH4LogTrans","SoilMoisPercent")
 xlabel <- "% Soil Moisture"

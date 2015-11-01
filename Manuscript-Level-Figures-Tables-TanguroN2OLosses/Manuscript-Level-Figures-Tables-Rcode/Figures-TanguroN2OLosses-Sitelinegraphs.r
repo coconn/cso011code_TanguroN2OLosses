@@ -5,7 +5,7 @@
 # disrupted N project
 # CS O'Connell, UMN EEB/IonE
 
-# UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 fluxes are in migrograms/cm2/h, N2O are in nanograms/cm2/h.
+# UNITS LABELING: 1 microgram (ug) = 1000 nanograms (ng), so micrograms are 1000 times bigger.  CO2 fluxes are in migrograms/cm^2/h, N2O are in nanograms/cm^2/h.
 
 
 ### list of figures to make
@@ -39,6 +39,7 @@ sitedatesummary <- subset(sitedatesummary, sitedatesummary$easysitename!="NA")
 fluxesfullmerge <- subset(fluxesfullmerge, fluxesfullmerge$easysitename!="NA")
 
 
+
 ########################################################################
 # LINE GRAPH, FLUXES VS. TIME BY LAND USE
 
@@ -48,15 +49,15 @@ fluxesfullmerge <- subset(fluxesfullmerge, fluxesfullmerge$easysitename!="NA")
 # + (legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)
 
 ## N2O
-ylabel <- "Flux N2O: ngN / cm2 / h"
+ylabel <- "Flux N2O: ngN / cm^2 / h"
 p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, colour=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab(ylabel) + theme_bw() + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
 ## CO2
-ylabel <- "Flux CO2: ugC / cm2 / h"
+ylabel <- "Flux CO2: ugC / cm^2 / h"
 p2 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, colour=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab(ylabel) + theme_bw() + theme(legend.position="none", axis.title.x=element_blank(), axis.text.x = element_blank()) + scale_x_date(labels = date_format("%m-%Y"))
 
 ## CH4
-ylabel <- "Flux CH4: ugC / cm2 / h"
+ylabel <- "Flux CH4: ugC / cm^2 / h"
 p3 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, colour=color.use)) + geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) + geom_point(size=2) + facet_wrap( ~ LUname, ncol=3) + xlab("Sampling Date") + ylab(ylabel) + theme_bw() + theme(legend.position="none", axis.text.x = element_text(angle=45, hjust=1, vjust=1)) + scale_x_date(labels = date_format("%m-%Y"))
 
 
@@ -108,7 +109,7 @@ dev.off()
 sitedatesummary <- subset(sitedatesummary, sitedatesummary$meanfluxN2Ol!="NA")
 
 # N2O flux pattern for each site
-p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxN2Ol, color=color.use)) + geom_errorbar(aes(ymin=meanfluxN2Ol-sdfluxN2Ol, ymax=meanfluxN2Ol+sdfluxN2Ol), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux N2O: ngN / cm^2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 
 # save
 png(file = paste(pathsavefigures, "sitetrackingN2O.png", sep=""),width=5,height=5,units="in",res=400)
@@ -118,14 +119,14 @@ dev.off()
 # put the CO2 and CH4 figures in the supplement
 
 # CO2 flux pattern for each site
-p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCO2l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCO2l-sdfluxCO2l, ymax=meanfluxCO2l+sdfluxCO2l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CO2: ugC / cm^2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # save
 png(file = paste(pathsavefigures, "sitetrackingCO2.png", sep=""),width=5,height=5,units="in",res=400)
 p1
 dev.off()
 
 # CH4 flux pattern for each site
-p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
+p1 <- ggplot(sitedatesummary, aes(x=SampleDate2, y=meanfluxCH4l, color=color.use)) + geom_errorbar(aes(ymin=meanfluxCH4l-sdfluxCH4l, ymax=meanfluxCH4l+sdfluxCH4l), width=5) + geom_point(size=1) + facet_wrap( ~ Site, ncol=3) + xlab("Sampling Date") + ylab("Flux CH4: ugC / cm^2 / h") + geom_line() + theme_bw() + theme(legend.position="none",axis.text.x = element_text(angle=45, hjust=1, vjust=1))
 # save
 png(file = paste(pathsavefigures, "sitetrackingCH4.png", sep=""),width=5,height=5,units="in",res=400)
 p1

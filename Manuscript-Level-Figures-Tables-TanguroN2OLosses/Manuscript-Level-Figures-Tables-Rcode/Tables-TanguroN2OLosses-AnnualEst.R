@@ -135,7 +135,7 @@ factorcolors <- c("#636363","#6baed6","#3182bd") # colorbrewer qualitative
 tabletmp <- subset(annualestcalc, annualestcalc$GasType=="N2O")[,c(1,3,4,5)]
 tabletmp.m <- melt(tabletmp, id.vars='LUtype')
 # plot
-p1 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux N2O: ngN / cm2 / year") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soya SC", "Soya/Maize DC")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
+p1 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux N2O: ngN / cm^2 / y") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soybean", "Soybean/Maize")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
 
 # CO2
 
@@ -143,7 +143,7 @@ p1 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + g
 tabletmp <- subset(annualestcalc, annualestcalc$GasType=="CO2")[,c(1,3,4,5)]
 tabletmp.m <- melt(tabletmp, id.vars='LUtype')
 # plot
-p2 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux CO2: ugC / cm2 / year") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soya SC", "Soya/Maize DC")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
+p2 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux CO2: ugC / cm^2 / y") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soybean", "Soybean/Maize")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
 
 # CH4
 
@@ -151,23 +151,25 @@ p2 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + g
 tabletmp <- subset(annualestcalc, annualestcalc$GasType=="CH4")[,c(1,3,4,5)]
 tabletmp.m <- melt(tabletmp, id.vars='LUtype')
 # plot
-p3 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux CH4: ugC / cm2 / year") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soya SC", "Soya/Maize DC")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
+p3 <- ggplot(data=tabletmp.m, aes(x=factor(LUtype), y=value, fill=variable)) + geom_bar(stat="identity", position="dodge") + ylab("Annual Flux CH4: ugC / cm^2 / y") + theme_bw() + scale_x_discrete(breaks=c("F", "S", "M"), labels=c("Forest", "Soybean", "Soybean/Maize")) + theme(axis.title.x = element_blank()) + scale_fill_manual(values = factorcolors, name="Annual Flux\nEstimate", breaks=c("estmid", "estlow", "esthigh"), labels=c("Mean Estimate", "Lower Bound Est.", "Higher Bound Est."))
 
 # save figures
 
-png(file = paste(pathsavefigures, "annual-estimate-N2O.png", sep=""),width=7,height=7,units="in",res=400)
+png(file = paste(pathsavefigures, "annual-estimate-N2O.png", sep=""),width=8,height=5,units="in",res=400)
 p1
 dev.off()
 
-png(file = paste(pathsavefigures, "annual-estimate-CO2.png", sep=""),width=7,height=7,units="in",res=400)
+png(file = paste(pathsavefigures, "annual-estimate-CO2.png", sep=""),width=8,height=5,units="in",res=400)
 p2
 dev.off()
 
-png(file = paste(pathsavefigures, "annual-estimate-CH4.png", sep=""),width=7,height=7,units="in",res=400)
+png(file = paste(pathsavefigures, "annual-estimate-CH4.png", sep=""),width=8,height=5,units="in",res=400)
 p3
 dev.off()
 
 # all together
+# versions with shared legend
+source("~/Documents/GITHUB/RPersonalFunctionsChristine/grid_arrange_shared_legend.r")
 png(file = paste(pathsavefigures, "annual-estimate-fluxes.png", sep=""),width=5,height=11,units="in",res=400)
 grid_arrange_shared_legend(p1, p2, p3, nrow = 1, ncol = 3)
 dev.off()
